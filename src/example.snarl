@@ -1,0 +1,60 @@
+#  MAKE TABLE. Make a table of factorials in ARRAY.
+
+proc makeTable ([10] int array) int:
+ int count
+begin
+ count := 0;
+ while count < 10
+ do begin
+     array[count] := factorial(count);
+     count := count + 1
+    end
+end;
+
+#  FACTORIAL. Return the factorial of NUMBER.
+
+proc factorial(int number) int:
+begin
+ if number = 0
+ then value 1
+ else value number * factorial(number - 1)
+end;
+
+#  MAIN. Main program. Fill TABLE with factorials, then print it.
+
+[10] int table;
+
+proc main () int:
+ int index
+begin
+ makeTable(table);
+ index := 0;
+ while index < 10
+ do begin
+     writeInteger(index);
+     writeString("   ");
+     writeInteger(table[index]);
+     writeString("\n");
+     index := index + 1
+    end
+end;
+
+#  WRITE INTEGER. Write NUMBER to standard output. Return NUMBER.
+
+proc writeInteger(int number) int:
+begin
+ code "li $v0, 1";
+ code "lw $a0, 0($fp)";
+ code "syscall";
+ code "move $v0, 0($fp)"
+end;
+
+#  WRITE STRING. Write MESSAGE to standard output. Return MESSAGE.
+
+proc writeString(string message) string:
+begin
+ code "li $v0, 4";
+ code "lw $a0, 0($fp)";
+ code "syscall";
+ code "move $v0, 0($fp)"
+end
