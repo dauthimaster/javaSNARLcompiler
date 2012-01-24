@@ -1,11 +1,10 @@
 import java.util.Hashtable;
 
-/**
- * Created by IntelliJ IDEA.
- * User: James Current
- * Date: 1/22/12
- * Time: 10:35 PM
- * To change this template use File | Settings | File Templates.
+/*
+SNARL/Scanner
+
+James Current
+1/22/12
  */
 public class Scanner extends Common{                                
     private int token; //current token
@@ -19,6 +18,14 @@ public class Scanner extends Common{
         for(int token = boldAndToken; token <= boldWhileToken; token++){
             reserved.put(tokenToString(token), token);
         }
+    }
+
+    public int getInt(){
+        return tokenInt;
+    }
+    
+    public String getString(){
+        return tokenString;
     }
     
     public int getToken(){
@@ -37,7 +44,8 @@ public class Scanner extends Common{
                 nextBlank();
             } else {
                 switch (source.getChar()){
-                    case '#': {nextComment();break;}
+                    case '#': {nextComment();break;} 
+                    case '"': {nextStringConstant();break;} 
                     case '+': {nextSingle(plusToken);break;}
                     case '-': {nextSingle(dashToken);break;}
                     case '*': {nextSingle(starToken);break;}
@@ -67,7 +75,7 @@ public class Scanner extends Common{
     }
 
     private boolean isBlank(char ch){
-        return ch == ' ' || ch =='\n' || ch == '\t';
+        return ch == ' ' || ch =='\n' || ch == '\t' || ch == '\r';
     }
 
     private boolean isReserved(String name){
@@ -80,6 +88,10 @@ public class Scanner extends Common{
     
     private void nextBlank(){
         source.nextChar();
+        while (isBlank(source.getChar())){
+            source.nextChar();    
+        }
+        
     }
     
     private void nextComment(){
@@ -127,6 +139,19 @@ public class Scanner extends Common{
             token = greaterToken;
         }
     }
+    
+    private void nextStringConstant(){
+        StringBuilder stringBuilder = new StringBuilder();
+        source.nextChar();
+        while (isLetter(source.getChar()) || isDigit(source.getChar()) || 
+                source.getChar() == ' ' || source.getChar() == '\t'){
+            stringBuilder.append(source.getChar());
+            source.nextChar();
+        }
+        if(source.atLineEnd()){
+            source.error("Invalid String: String contains newline");
+        }
+    }
 
     private void nextName(){
         StringBuilder nameString = new StringBuilder();
@@ -155,6 +180,12 @@ public class Scanner extends Common{
             source.error("Integer larger than 32-bit");
         }
         tokenString = intString.toString();
+    }
+    
+    public static void main(String[] args){
+        Scanner scanner = new Scanner(args[0]);
+        scanner.nextToken();
+        while (scanner.getToken() != )
     }
 }
                                   
