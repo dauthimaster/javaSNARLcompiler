@@ -60,6 +60,7 @@ public class Scanner extends Common{
                     case ':': {nextColon();break;}
                     case '<': {nextLess();break;}
                     case '>': {nextGreater();break;}
+                    case eofChar: {nextEofToken();break;}
                     default: source.error("Illegal token");
                 }   
             }
@@ -150,6 +151,11 @@ public class Scanner extends Common{
         }
         if(source.atLineEnd()){
             source.error("Invalid String: String contains newline");
+        } else if(source.getChar() != '"'){
+            source.error("Invalid String: String must end with a \"");
+        } else {
+            token = stringConstantToken;
+            tokenString = stringBuilder.toString();
         }
     }
 
@@ -181,11 +187,15 @@ public class Scanner extends Common{
         }
         tokenString = intString.toString();
     }
+
+    private void nextEofToken(){
+        token = endFileToken;
+    }
     
     public static void main(String[] args){
         Scanner scanner = new Scanner(args[0]);
         scanner.nextToken();
-        while (scanner.getToken() != )
+        while (scanner.getToken() !=)
     }
 }
                                   
