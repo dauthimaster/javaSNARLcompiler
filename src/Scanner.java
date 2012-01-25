@@ -67,27 +67,27 @@ public class Scanner extends Common{
         }
     }
 
-    private boolean isLetter(char ch){
+    protected boolean isLetter(char ch){
         return 'A' <= ch && ch <= 'Z' || 'a' <= ch && ch <= 'z';
     }
 
-    private boolean isDigit(char ch){
+    protected boolean isDigit(char ch){
         return '0' <= ch && ch <= '9';
     }
 
-    private boolean isBlank(char ch){
+    protected boolean isBlank(char ch){
         return ch == ' ' || ch =='\n' || ch == '\t' || ch == '\r';
     }
 
-    private boolean isReserved(String name){
+    protected boolean isReserved(String name){
         return reserved.containsKey(name);
     }
 
-    private int getReserved(String name){
+    protected int getReserved(String name){
         return (Integer)reserved.get(name);
     }
     
-    private void nextBlank(){
+    protected void nextBlank(){
         source.nextChar();
         while (isBlank(source.getChar())){
             source.nextChar();    
@@ -95,7 +95,7 @@ public class Scanner extends Common{
         
     }
     
-    private void nextComment(){
+    protected void nextComment(){
         source.nextChar();
         while (!source.atLineEnd()){
             source.nextChar();
@@ -103,7 +103,7 @@ public class Scanner extends Common{
         source.nextChar();
     }
     
-    private void nextColon(){
+    protected void nextColon(){
         source.nextChar();
         if (source.getChar() == '='){
             token = colonEqualToken;
@@ -113,12 +113,12 @@ public class Scanner extends Common{
         }
     }
 
-    private void nextSingle(int token){
+    protected void nextSingle(int token){
         this.token = token;
         source.nextChar();
     }
 
-    private void nextLess(){
+    protected void nextLess(){
         source.nextChar();
         if(source.getChar() == '>'){
             token = lessGreaterToken;
@@ -131,7 +131,7 @@ public class Scanner extends Common{
         }
     }
     
-    private void nextGreater(){
+    protected void nextGreater(){
         source.nextChar();
         if(source.getChar() == '='){
             token = greaterEqualToken;
@@ -141,7 +141,7 @@ public class Scanner extends Common{
         }
     }
     
-    private void nextStringConstant(){
+    protected void nextStringConstant(){
         StringBuilder stringBuilder = new StringBuilder();
         source.nextChar();
         while (isLetter(source.getChar()) || isDigit(source.getChar()) || 
@@ -159,7 +159,7 @@ public class Scanner extends Common{
         }
     }
 
-    private void nextName(){
+    protected void nextName(){
         StringBuilder nameString = new StringBuilder();
         while (isLetter(source.getChar()) || isDigit(source.getChar())){
             nameString.append(source.getChar());
@@ -173,7 +173,7 @@ public class Scanner extends Common{
         }
     }
 
-    private void nextIntConstant(){
+    protected void nextIntConstant(){
         token = intConstantToken;
         StringBuilder intString = new StringBuilder();
         while (isDigit(source.getChar())){
@@ -188,14 +188,10 @@ public class Scanner extends Common{
         tokenString = intString.toString();
     }
 
-    private void nextEofToken(){
+    protected void nextEofToken(){
         token = endFileToken;
     }
     
-    public static void main(String[] args){
-        Scanner scanner = new Scanner(args[0]);
-        scanner.nextToken();
-        while (scanner.getToken() !=)
-    }
+    //main excluded because I'm using unit tests, as per our email conversation.
 }
                                   
