@@ -12,7 +12,9 @@ public class Scanner extends Common{
     private String tokenString; //current token as string
     private int tokenInt; //current token as int
     private Hashtable reserved = new Hashtable(15); // Hashtable of reserved names
-    
+
+    //CONSTRUCTOR. Return a new Scanner positiond at the beginning of the file and with a populated Hashtable
+
     public Scanner(String path){
         source = new Source(path);
         for(int token = boldAndToken; token <= boldWhileToken; token++){
@@ -20,13 +22,19 @@ public class Scanner extends Common{
         }
     }
 
+    //getInt. Return the current token's int value (if applicable, otherwise an undefined int)
+
     public int getInt(){
         return tokenInt;
     }
+
+    //getString. Return the current token's string (if applicable, otherwise an undefined string)
     
     public String getString(){
         return tokenString;
     }
+
+    //getToken. Return the current token from the source file
     
     public int getToken(){
         return token;
@@ -45,7 +53,7 @@ public class Scanner extends Common{
             } else {
                 switch (source.getChar()){
                     case '#': {nextComment();break;} 
-                    case '"': {nextStringConstant();break;} 
+                    case '\"': {nextStringConstant();break;}
                     case '+': {nextSingle(plusToken);break;}
                     case '-': {nextSingle(dashToken);break;}
                     case '*': {nextSingle(starToken);break;}
@@ -67,43 +75,59 @@ public class Scanner extends Common{
         }
     }
 
-    protected boolean isLetter(char ch){
+    //isLetter. Checks if a character is a letter
+
+    private boolean isLetter(char ch){
         return 'A' <= ch && ch <= 'Z' || 'a' <= ch && ch <= 'z';
     }
 
-    protected boolean isDigit(char ch){
+    //isDigit. Checks if a character is a digit
+
+    private boolean isDigit(char ch){
         return '0' <= ch && ch <= '9';
     }
 
-    protected boolean isBlank(char ch){
+    //isBlank. Checks if a character is a blank
+
+    private boolean isBlank(char ch){
         return ch == ' ' || ch =='\n' || ch == '\t' || ch == '\r';
     }
 
-    protected boolean isReserved(String name){
+    //isReserved. Checks if a string is a reserved name
+
+    private boolean isReserved(String name){
         return reserved.containsKey(name);
     }
 
-    protected int getReserved(String name){
+    //getReserved. Retrieves the token by looking it up in the Hashtable by it's string
+
+    private int getReserved(String name){
         return (Integer)reserved.get(name);
     }
+
+    //nextBlank. Skips characters considered to be blanks
     
-    protected void nextBlank(){
+    private void nextBlank(){
         source.nextChar();
         while (isBlank(source.getChar())){
             source.nextChar();    
         }
         
     }
+
+    //nextComment. Skips all characters until newline
     
-    protected void nextComment(){
+    private void nextComment(){
         source.nextChar();
         while (!source.atLineEnd()){
             source.nextChar();
         }
         source.nextChar();
     }
+
+    //nextColon. Tests for : or :=
     
-    protected void nextColon(){
+    private void nextColon(){
         source.nextChar();
         if (source.getChar() == '='){
             token = colonEqualToken;
@@ -113,12 +137,16 @@ public class Scanner extends Common{
         }
     }
 
-    protected void nextSingle(int token){
+    //nextSingle. Called for any stand alone tokens (like * + - ,)
+
+    private void nextSingle(int token){
         this.token = token;
         source.nextChar();
     }
 
-    protected void nextLess(){
+    //nextLess. Tests for < , <= , or <>
+
+    private void nextLess(){
         source.nextChar();
         if(source.getChar() == '>'){
             token = lessGreaterToken;
@@ -130,8 +158,10 @@ public class Scanner extends Common{
             token = lessToken;
         }
     }
+
+    //nextGreater. Tests for either a > or a >=
     
-    protected void nextGreater(){
+    private void nextGreater(){
         source.nextChar();
         if(source.getChar() == '='){
             token = greaterEqualToken;
@@ -140,26 +170,31 @@ public class Scanner extends Common{
             token = greaterToken;
         }
     }
+
+    //nextStringConstant. Collects characters other than " and newline and builds a string.
+    //Calls ERROR if string contains a newline (logic also covers if missing a ") ex:
+    //WriteString("Fail);
+    //WriteInteger(10);
     
-    protected void nextStringConstant(){
+    private void nextStringConstant(){
         StringBuilder stringBuilder = new StringBuilder();
         source.nextChar();
-        while (isLetter(source.getChar()) || isDigit(source.getChar()) || 
-                source.getChar() == ' ' || source.getChar() == '\t'){
+        while (source.getChar() != '\"' && !source.atLineEnd()){
             stringBuilder.append(source.getChar());
             source.nextChar();
         }
         if(source.atLineEnd()){
-            source.error("Invalid String: String contains newline");
-        } else if(source.getChar() != '"'){
-            source.error("Invalid String: String must end with a \"");
+            source.error("Invalid String");
         } else {
             token = stringConstantToken;
             tokenString = stringBuilder.toString();
+            source.nextChar();
         }
     }
 
-    protected void nextName(){
+    //nextName. Collects letters and digits to build a name, checks if name is reserved
+
+    private void nextName(){
         StringBuilder nameString = new StringBuilder();
         while (isLetter(source.getChar()) || isDigit(source.getChar())){
             nameString.append(source.getChar());
@@ -173,7 +208,9 @@ public class Scanner extends Common{
         }
     }
 
-    protected void nextIntConstant(){
+    //nextIntConstant. Collects digits to build an integer, calls ERROR if int is larger than 32-bit.
+
+    private void nextIntConstant(){
         token = intConstantToken;
         StringBuilder intString = new StringBuilder();
         while (isDigit(source.getChar())){
@@ -188,10 +225,50 @@ public class Scanner extends Common{
         tokenString = intString.toString();
     }
 
-    protected void nextEofToken(){
+    //nextEofToken. Called at End Of File
+
+    private void nextEofToken(){
         token = endFileToken;
     }
+
+    //MAIN. For testing. List path to test file
     
-    //main excluded because I'm using unit tests, as per our email conversation.
+    public static void main(String[] args){
+        Scanner scanner = new Scanner(args[0]);
+        while(scanner.getToken() != endFileToken){
+            scanner.nextToken();
+            System.out.print(tokenToString(scanner.getToken()) + " ");
+            if(scanner.getToken() == intConstantToken){
+                System.out.print(scanner.getInt() + " ");
+                System.out.print(scanner.getString() + " ");
+            } else if(scanner.getToken() == stringConstantToken){
+                System.out.print("\"" + scanner.getString() + "\" ");
+            } else if(scanner.getToken() == nameToken || scanner.reserved.containsValue(scanner.getToken())){
+                System.out.print(scanner.getString() + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+
+        //Two other more focused outputs
+        /*scanner.source.reset();
+        while(scanner.getToken() != endFileToken){
+            scanner.nextToken();
+            if(scanner.reserved.containsValue(scanner.getToken())){
+                System.out.print(tokenToString(scanner.getToken()) + " ");
+                System.out.print(scanner.getString());
+                System.out.println();
+            }
+        }
+        System.out.println();
+        scanner.source.reset();
+        while(scanner.getToken() != endFileToken){
+            scanner.nextToken();
+            if(scanner.getToken() == stringConstantToken){
+                System.out.print("\"" + scanner.getString() + "\"");
+                System.out.println();
+            }
+        }*/
+    }
 }
                                   
