@@ -13,7 +13,7 @@ public class Scanner extends Common{
     private int tokenInt; //current token as int
     private Hashtable reserved = new Hashtable(15); // Hashtable of reserved names
 
-    //CONSTRUCTOR. Return a new Scanner positiond at the beginning of the file and with a populated Hashtable
+    //CONSTRUCTOR. Return a new Scanner positioned at the beginning of the file and with a populated Hashtable
 
     public Scanner(String path){
         source = new Source(path);
