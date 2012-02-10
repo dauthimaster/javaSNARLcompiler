@@ -1,3 +1,6 @@
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.Hashtable;
 
 /*
@@ -15,8 +18,8 @@ public class Scanner extends Common{
 
     //CONSTRUCTOR. Return a new Scanner positioned at the beginning of the file and with a populated Hashtable
 
-    public Scanner(String path){
-        source = new Source(path);
+    public Scanner(Reader in){
+        source = new Source(in);
         for(int token = boldAndToken; token <= boldWhileToken; token++){
             reserved.put(tokenToString(token), token);
         }
@@ -234,7 +237,12 @@ public class Scanner extends Common{
     //MAIN. For testing. List path to test file
     
     public static void main(String[] args){
-        Scanner scanner = new Scanner(args[0]);
+        Scanner scanner;
+        try {
+            scanner = new Scanner(new FileReader(args[0]));
+        } catch (FileNotFoundException ignore) {
+            throw new RuntimeException("Cannot open" + args[0] + ".");
+        }
         while(scanner.getToken() != endFileToken){
             scanner.nextToken();
             System.out.print(tokenToString(scanner.getToken()) + " ");

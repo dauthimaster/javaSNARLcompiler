@@ -1,3 +1,5 @@
+import java.io.Reader;
+
 /**
  * Created by IntelliJ IDEA.
  * User: dauthimaster
@@ -6,6 +8,12 @@
  * To change this template use File | Settings | File Templates.
  */
 public class Parser extends Common{
+    private Scanner scanner;
+
+    public Parser(Reader in){
+        scanner = new Scanner(in);
+    }
+
     private void nextDisjunction(){
         enter("disjunction");
         nextConjunction();

@@ -5,9 +5,7 @@
 //    20 Jan 12
 //
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 //  SOURCE. Read characters from a Snarl source file. Maybe assert errors.
 
@@ -17,26 +15,26 @@ class Source extends Common
     private String         line;       //  Last line read from READER.
     private int            lineCount;  //  Number of lines read from READER.
     private int            lineIndex;  //  Index of current character in LINE.
-    private String         path;       //  Pathname of source file.
+    private Reader         in;       //  Pathname of source file.
     private BufferedReader reader;     //  Read source characters from here.
 
 //  Constructor. Return a new SOURCE, positioned at its first character.
 
-    public Source(String path)
+    public Source(Reader in)
     {
-        try
-        {
+       // try
+        //{
             lineCount = 0;
             lineIndex = 0;
-            this.path = path;
-            reader = new BufferedReader(new FileReader(path));
+            this.in = in;
+            reader = new BufferedReader(in);
             nextLine();
             nextChar();
-        }
+       /* }
         catch (IOException ignore)
         {
-            throw new RuntimeException("Cannot open " + path + ".");
-        }
+            throw new RuntimeException("Cannot open " + this.in + ".");
+        }*/
     }
 
 //  ERROR. Write an error message to standard output, then halt. We first write
@@ -108,7 +106,7 @@ class Source extends Common
         }
         catch (IOException ignore)
         {
-            throw new RuntimeException("Cannot read " + path + ".");
+            throw new RuntimeException("Cannot read " + in + ".");
         }
     }
 
@@ -122,13 +120,13 @@ class Source extends Common
             lineCount = 0;
             lineIndex = 0;
             reader.close();
-            reader = new BufferedReader(new FileReader(path));
+            reader = new BufferedReader(in);
             nextLine();
             nextChar();
         }
         catch (IOException ignore)
         {
-            throw new RuntimeException("Cannot open " + path + ".");
+            throw new RuntimeException("Cannot open " + in + ".");
         }
     }
 
@@ -136,7 +134,12 @@ class Source extends Common
 
     public static void main(String[] files)
     {
-        Source source = new Source(files[0]);
+        Source source = null;
+        try {
+            source = new Source(new FileReader(files[0]));
+        } catch (FileNotFoundException ignore) {
+            throw new RuntimeException("Cannot open" + files[0] + ".");
+        }
         while (source.getChar() != eofChar)
         {
             while (! source.atLineEnd())
