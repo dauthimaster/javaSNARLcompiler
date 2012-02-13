@@ -1,6 +1,5 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.Reader;
 import java.util.Hashtable;
 
 /*
@@ -14,15 +13,18 @@ public class Scanner extends Common{
     private Source source; //read chars from here
     private String tokenString; //current token as string
     private int tokenInt; //current token as int
-    private Hashtable reserved = new Hashtable(15); // Hashtable of reserved names
+    private Hashtable <String,Integer>reserved = new Hashtable<String,Integer>(15); // Hashtable of reserved names
 
     //CONSTRUCTOR. Return a new Scanner positioned at the beginning of the file and with a populated Hashtable
 
-    public Scanner(Reader in){
-        source = new Source(in);
+    public Scanner(Source source){
+        this.source = source;
         for(int token = boldAndToken; token <= boldWhileToken; token++){
             reserved.put(tokenToString(token), token);
         }
+        tokenInt = 0;
+        tokenString = "";
+        nextToken();
     }
 
     //getInt. Return the current token's int value (if applicable, otherwise an undefined int)
@@ -105,7 +107,7 @@ public class Scanner extends Common{
     //getReserved. Retrieves the token by looking it up in the Hashtable by it's string
 
     private int getReserved(String name){
-        return (Integer)reserved.get(name);
+        return reserved.get(name);
     }
 
     //nextBlank. Skips characters considered to be blanks
@@ -238,11 +240,13 @@ public class Scanner extends Common{
     
     public static void main(String[] args){
         Scanner scanner;
+        Source source;
         try {
-            scanner = new Scanner(new FileReader(args[0]));
+            source = new Source(new FileReader(args[0]));
         } catch (FileNotFoundException ignore) {
             throw new RuntimeException("Cannot open" + args[0] + ".");
         }
+        scanner = new Scanner(source);
         while(scanner.getToken() != endFileToken){
             scanner.nextToken();
             System.out.print(tokenToString(scanner.getToken()) + " ");
