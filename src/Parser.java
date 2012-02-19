@@ -6,32 +6,32 @@
  * To change this template use File | Settings | File Templates.
  */
 public class Parser extends Common{
-    private Scanner scanner;
-    private long comparisonOperators = makeSet(
+    protected Scanner scanner;
+    protected long comparisonOperators = makeSet(
             equalToken,
             greaterToken,
             lessToken,
             lessEqualToken,
             greaterEqualToken,
             lessGreaterToken);
-    private long sumOperators = makeSet(
+    protected long sumOperators = makeSet(
             plusToken,
             dashToken);
-    private long productOperators = makeSet(
+    protected long productOperators = makeSet(
             starToken,
             slashToken);
-    private long declarationTokens = makeSet(
-            intConstantToken,
-            stringConstantToken,
+    protected long declarationTokens = makeSet(
+            boldIntToken,
+            boldStringToken,
             openBracketToken);
-    private Source source;
+    protected Source source;
     
     public Parser(Source source){
         this.source = source;
         scanner = new Scanner(source);
     }
 
-    private long makeSet(int... elements){
+    protected long makeSet(int... elements){
         long set = 0L;
         for(int element : elements){           
             set |= (1L << element);
@@ -40,7 +40,7 @@ public class Parser extends Common{
     }
     
     //test if element is in set
-    private boolean isInSet(int element, long set){
+    protected boolean isInSet(int element, long set){
         return (set & (1L << element)) != 0L;
     }
 
@@ -51,19 +51,70 @@ public class Parser extends Common{
             nextExpected(semicolonToken);
             nextProgramPart();
         }
+        exit("program");
     }
 
-    private void nextProgramPart(){
+    protected void nextProgramPart(){
+        enter("program part");
         if(isInSet(scanner.getToken(), declarationTokens)){
             nextDeclaration();
-            scanner.nextToken();
         } else if(scanner.getToken() == boldProcToken){
             nextProcedure();
-            scanner.nextToken();
+        } else {
+            source.error("Invalid token: " + tokenToString(scanner.getToken()));
         }
+        exit("program part");
     }
     
-    private void nextExpression(){
+    protected void nextDeclaration(){
+        enter("declaration");
+        scanner.nextToken();
+
+        if(scanner.getToken() != nameToken){
+            nextExpected(intConstantToken);
+            nextExpected(closeBracketToken);
+            nextExpected(boldIntToken);
+        }
+
+        nextExpected(nameToken);
+
+        exit("declaration");
+    }
+
+    protected void nextProcedure(){
+        enter("procedure");
+        scanner.nextToken();
+
+        nextExpected(nameToken);
+        nextExpected(openParenToken);
+
+        if(scanner.getToken() != closeParenToken){
+            nextParameters();
+        }
+
+        nextExpected(closeParenToken);
+       
+        if(scanner.getToken() == boldIntToken){
+            scanner.nextToken();
+        } else {
+            nextExpected(boldStringToken);
+        }
+
+        nextExpected(colonToken);
+        nextBody();
+
+        exit("procedure");
+    }
+
+    protected void nextParameters(){
+        enter("parameters");
+
+
+
+        exit("parameters");
+    }
+    
+    protected void nextExpression(){
         enter("expression");
         nextConjunction();
         while (scanner.getToken() == boldOrToken) {
@@ -73,7 +124,7 @@ public class Parser extends Common{
         exit("expression");
     }
     
-    private void nextUnit(){
+    protected void nextUnit(){
         enter("unit");
         switch (scanner.getToken()){
             case nameToken: {nextCallOrVariable();break;}
@@ -89,11 +140,31 @@ public class Parser extends Common{
         }
     }
 
-    private void nextExpected(int token){
+    protected void nextExpected(int token){
         if(scanner.getToken() == token){
             scanner.nextToken();
         } else {
             source.error("Expected " + tokenToString(token) + ".");
+        }
+    }
+
+    protected void nextExpected(int[] tokens){
+        boolean expected = false;
+        for (int token : tokens) {
+            if (scanner.getToken() == token) {
+                expected = true;
+            }
+        }
+        if(expected){
+            scanner.nextToken();
+        } else {
+            StringBuilder error = new StringBuilder();
+            for(int i = 0; i < tokens.length - 1; i++){
+                error.append(tokenToString(tokens[i]));
+                error.append(" or ");
+            }
+            error.append(tokenToString(tokens[tokens.length - 1]));
+            source.error("Expected " + error.toString() + ".");
         }
     }
 }

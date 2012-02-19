@@ -9,11 +9,11 @@ James Current
 1/22/12
  */
 public class Scanner extends Common{                                
-    private int token; //current token
-    private Source source; //read chars from here
-    private String tokenString; //current token as string
-    private int tokenInt; //current token as int
-    private Hashtable <String,Integer>reserved = new Hashtable<String,Integer>(15); // Hashtable of reserved names
+    protected int token; //current token
+    protected Source source; //read chars from here
+    protected String tokenString; //current token as string
+    protected int tokenInt; //current token as int
+    protected Hashtable <String,Integer>reserved = new Hashtable<String,Integer>(15); // Hashtable of reserved names
 
     //CONSTRUCTOR. Return a new Scanner positioned at the beginning of the file and with a populated Hashtable
 
@@ -82,37 +82,37 @@ public class Scanner extends Common{
 
     //isLetter. Checks if a character is a letter
 
-    private boolean isLetter(char ch){
+    protected boolean isLetter(char ch){
         return 'A' <= ch && ch <= 'Z' || 'a' <= ch && ch <= 'z';
     }
 
     //isDigit. Checks if a character is a digit
 
-    private boolean isDigit(char ch){
+    protected boolean isDigit(char ch){
         return '0' <= ch && ch <= '9';
     }
 
     //isBlank. Checks if a character is a blank
 
-    private boolean isBlank(char ch){
+    protected boolean isBlank(char ch){
         return ch == ' ' || ch =='\n' || ch == '\t' || ch == '\r';
     }
 
     //isReserved. Checks if a string is a reserved name
 
-    private boolean isReserved(String name){
+    protected boolean isReserved(String name){
         return reserved.containsKey(name);
     }
 
-    //getReserved. Retrieves the token by looking it up in the Hashtable by it's string
+    //getReserved. Retrieves the token by looking it up in the Hashtable by its string
 
-    private int getReserved(String name){
+    protected int getReserved(String name){
         return reserved.get(name);
     }
 
     //nextBlank. Skips characters considered to be blanks
     
-    private void nextBlank(){
+    protected void nextBlank(){
         source.nextChar();
         while (isBlank(source.getChar())){
             source.nextChar();    
@@ -122,7 +122,7 @@ public class Scanner extends Common{
 
     //nextComment. Skips all characters until newline
     
-    private void nextComment(){
+    protected void nextComment(){
         source.nextChar();
         while (!source.atLineEnd()){
             source.nextChar();
@@ -132,7 +132,7 @@ public class Scanner extends Common{
 
     //nextColon. Tests for : or :=
     
-    private void nextColon(){
+    protected void nextColon(){
         source.nextChar();
         if (source.getChar() == '='){
             token = colonEqualToken;
@@ -144,14 +144,14 @@ public class Scanner extends Common{
 
     //nextSingle. Called for any stand alone tokens (like * + - ,)
 
-    private void nextSingle(int token){
+    protected void nextSingle(int token){
         this.token = token;
         source.nextChar();
     }
 
     //nextLess. Tests for < , <= , or <>
 
-    private void nextLess(){
+    protected void nextLess(){
         source.nextChar();
         if(source.getChar() == '>'){
             token = lessGreaterToken;
@@ -166,7 +166,7 @@ public class Scanner extends Common{
 
     //nextGreater. Tests for either a > or a >=
     
-    private void nextGreater(){
+    protected void nextGreater(){
         source.nextChar();
         if(source.getChar() == '='){
             token = greaterEqualToken;
@@ -181,7 +181,7 @@ public class Scanner extends Common{
     //WriteString("Fail);
     //WriteInteger(10);
     
-    private void nextStringConstant(){
+    protected void nextStringConstant(){
         StringBuilder stringBuilder = new StringBuilder();
         source.nextChar();
         while (source.getChar() != '\"' && !source.atLineEnd()){
@@ -199,7 +199,7 @@ public class Scanner extends Common{
 
     //nextName. Collects letters and digits to build a name, checks if name is reserved
 
-    private void nextName(){
+    protected void nextName(){
         StringBuilder nameString = new StringBuilder();
         while (isLetter(source.getChar()) || isDigit(source.getChar())){
             nameString.append(source.getChar());
@@ -215,7 +215,7 @@ public class Scanner extends Common{
 
     //nextIntConstant. Collects digits to build an integer, calls ERROR if int is larger than 32-bit.
 
-    private void nextIntConstant(){
+    protected void nextIntConstant(){
         token = intConstantToken;
         StringBuilder intString = new StringBuilder();
         while (isDigit(source.getChar())){
@@ -232,7 +232,7 @@ public class Scanner extends Common{
 
     //nextEofToken. Called at End Of File
 
-    private void nextEofToken(){
+    protected void nextEofToken(){
         token = endFileToken;
     }
 
