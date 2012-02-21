@@ -1,3 +1,6 @@
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
 /**
  * Created by IntelliJ IDEA.
  * User: dauthimaster
@@ -50,8 +53,8 @@ public class Parser extends Common{
     public void nextProgram(){
         enter("program");
         nextProgramPart();
-        while (scanner.getToken() != endFileToken){
-            nextExpected(semicolonToken);
+        while (scanner.getToken() == semicolonToken){
+            scanner.nextToken();
             nextProgramPart();
         }
         exit("program");
@@ -64,7 +67,7 @@ public class Parser extends Common{
         } else if(scanner.getToken() == boldProcToken){
             nextProcedure();
         } else {
-            source.error("Invalid token: " + tokenToString(scanner.getToken()));
+            nextExpected(boldProcToken,boldIntToken,boldStringToken,openBracketToken);
         }
         exit("program part");
     }
@@ -368,15 +371,15 @@ public class Parser extends Common{
         exit("arguments");
     }
 
-    protected void nextExpected(int token){
+    protected void nextExpected(int token) throws SnarlCompilerException{
         if(scanner.getToken() == token){
             scanner.nextToken();
         } else {
-            source.error("Expected " + tokenToString(token) + ".");
+            throw new SnarlCompilerException("Expected " + tokenToString(token) + ".");
         }
     }
 
-    protected void nextExpected(int... tokens){
+    protected void nextExpected(int... tokens) throws SnarlCompilerException{
         boolean expected = false;
         for (int token : tokens) {
             if (scanner.getToken() == token) {
@@ -392,7 +395,24 @@ public class Parser extends Common{
                 error.append(" or ");
             }
             error.append(tokenToString(tokens[tokens.length - 1]));
-            source.error("Expected " + error.toString() + ".");
+            throw new SnarlCompilerException("Expected " + error.toString() + ".");
+        }
+    }
+    
+    public static void main(String[] args){
+        Parser parser;
+        Source source;
+        try {
+            source = new Source(new FileReader(args[0]));
+        } catch (FileNotFoundException ignore) {
+            throw new RuntimeException("Cannot open" + args[0] + ".");
+        }
+        parser = new Parser(source);
+        
+        try{
+            parser.nextProgram();
+        } catch (SnarlCompilerException e){
+            parser.source.error(e.message);
         }
     }
 }

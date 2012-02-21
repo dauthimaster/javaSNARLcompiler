@@ -46,7 +46,7 @@ public class Scanner extends Common{
     }
     
     //NEXT TOKEN. Read the next token in from the source file
-    public void nextToken(){
+    public void nextToken() throws SnarlCompilerException{
         token = ignoredToken;
         while (token == ignoredToken){
             if(isLetter(source.getChar())){
@@ -74,7 +74,7 @@ public class Scanner extends Common{
                     case '<': {nextLess();break;}
                     case '>': {nextGreater();break;}
                     case eofChar: {nextEofToken();break;}
-                    default: source.error("Illegal token");
+                    default: throw new SnarlCompilerException("Illegal token");
                 }   
             }
         }
@@ -189,7 +189,7 @@ public class Scanner extends Common{
             source.nextChar();
         }
         if(source.atLineEnd()){
-            source.error("Invalid String");
+            throw new SnarlCompilerException("Invalid String");
         } else {
             token = stringConstantToken;
             tokenString = stringBuilder.toString();
@@ -225,7 +225,7 @@ public class Scanner extends Common{
         try{
             tokenInt = Integer.parseInt(intString.toString());
         } catch (NumberFormatException ignore){
-            source.error("Integer larger than 32-bit");
+            throw new SnarlCompilerException("Integer larger than 32-bit");
         }
         tokenString = intString.toString();
     }
