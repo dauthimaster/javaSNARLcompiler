@@ -20,6 +20,9 @@ public class Parser extends Common{
     protected long productOperators = makeSet(
             starToken,
             slashToken);
+    protected long termOperators = makeSet(
+            dashToken,
+            boldNotToken);
     protected long declarationTokens = makeSet(
             boldIntToken,
             boldStringToken,
@@ -68,7 +71,7 @@ public class Parser extends Common{
     
     protected void nextDeclaration(){
         enter("declaration");
-        scanner.nextToken();
+        nextExpected(boldIntToken, boldStringToken, openBracketToken);
 
         if(scanner.getToken() != nameToken){
             nextExpected(intConstantToken);
@@ -93,14 +96,9 @@ public class Parser extends Common{
         }
 
         nextExpected(closeParenToken);
-       
-        if(scanner.getToken() == boldIntToken){
-            scanner.nextToken();
-        } else {
-            nextExpected(boldStringToken);
-        }
-
+        nextExpected(boldIntToken, boldStringToken);
         nextExpected(colonToken);
+
         nextBody();
 
         exit("procedure");
@@ -109,25 +107,242 @@ public class Parser extends Common{
     protected void nextParameters(){
         enter("parameters");
 
+        nextDeclaration();
 
+        while(scanner.getToken() == commaToken){
+            scanner.nextToken();
+            nextDeclaration();
+        }
 
         exit("parameters");
     }
+
+    protected void nextBody(){
+        enter("body");
+
+        if(scanner.getToken() != boldBeginToken){
+            
+            nextDeclaration();
+
+            while(scanner.getToken() == semicolonToken){
+                scanner.nextToken();
+                nextDeclaration();
+            }
+        }
+        
+        nextBeginStatement();
+
+        exit("body");
+    }
     
+    protected void nextStatement(){
+        enter("statement");
+        
+        switch(scanner.getToken()){
+            case nameToken: {nextAssignmentOrCallStatement();break;}
+            case boldBeginToken: {nextBeginStatement();break;}
+            case boldCodeToken: {nextCodeStatement();break;}
+            case boldIfToken: {nextIfStatement();break;}
+            case boldValueToken : {nextValueStatement();break;}
+            case boldWhileToken: {nextWhileStatement();break;}
+            default: nextExpected(nameToken,boldBeginToken,boldCodeToken,boldIfToken,boldValueToken,boldWhileToken);
+        }
+        
+        exit("statement");
+    }
+    
+    protected void nextAssignmentOrCallStatement(){
+        enter("assignment or call statement");
+        
+        nextExpected(nameToken);
+        
+        switch(scanner.getToken()){
+            case openParenToken: {
+                scanner.nextToken();
+                nextArguments();
+                nextExpected(closeParenToken);
+                break;
+            }
+            case openBracketToken: {
+                scanner.nextToken();
+                nextExpression();
+                nextExpected(closeBracketToken);
+            }
+            case colonEqualToken: {
+                scanner.nextToken();
+                nextExpression();
+                break;
+            }
+        }
+        
+        exit("assignment or call statement");
+    }
+    
+    protected void nextBeginStatement(){
+        enter("begin statement");
+        
+        nextExpected(boldBeginToken);
+        
+        if(scanner.getToken() != boldEndToken){
+            
+            nextStatement();
+            
+            while(scanner.getToken() == semicolonToken){
+                scanner.nextToken();
+                nextStatement();
+            }
+        }
+        
+        nextExpected(boldEndToken);
+        
+        exit("begin statement");
+    }
+    
+    protected void nextCodeStatement(){
+        enter("code statement");
+        
+        nextExpected(boldCodeToken);
+        nextExpected(stringConstantToken);
+        
+        exit("code statement");
+    }
+    
+    protected void nextIfStatement(){
+        enter("if statement");
+        
+        nextExpected(boldIfToken);
+        nextExpression();
+        
+        nextExpected(boldThenToken);
+        nextStatement();
+        
+        if(scanner.getToken() == boldElseToken){
+            nextStatement();
+        }
+        
+        exit("if statement");
+    }
+    
+    protected void nextValueStatement(){
+        enter("value statement");
+        
+        nextExpected(boldValueToken);
+        nextExpression();
+        
+        exit("value statement");
+    }
+    
+    protected void nextWhileStatement(){
+        enter("while statement");
+        
+        nextExpected(boldWhileToken);
+        nextExpression();
+        
+        nextExpected(boldDoToken);
+        nextStatement();
+        
+        exit("while statement");
+    }
+
     protected void nextExpression(){
         enter("expression");
+        
         nextConjunction();
-        while (scanner.getToken() == boldOrToken) {
+        
+        while (scanner.getToken() == boldOrToken){
             scanner.nextToken();
             nextConjunction();
         }
+        
         exit("expression");
+    }
+    
+    protected void nextConjunction(){
+        enter("conjunction");
+        
+        nextComparison();
+        
+        while (scanner.getToken() == boldAndToken){
+            scanner.nextToken();
+            nextComparison();
+        }
+        
+        exit("conjunction");
+    }
+    
+    protected void nextComparison(){
+        enter("comparison");
+        
+        nextSum();
+        
+        if(isInSet(scanner.getToken(), comparisonOperators)){
+            scanner.nextToken();
+            nextSum();
+        }
+        
+        exit("comparison");
+    }
+    
+    protected void nextSum(){
+        enter("sum");
+        
+        nextProduct();
+        
+        while(isInSet(scanner.getToken(),sumOperators)){
+            scanner.nextToken();
+            nextProduct();
+        }
+        
+        exit("sum");
+    }
+
+    protected void nextProduct(){
+        enter("product");
+
+        nextTerm();
+
+        while(isInSet(scanner.getToken(),productOperators)){
+            scanner.nextToken();
+            nextTerm();
+        }
+
+        exit("product");
+    }
+
+    protected void nextTerm(){
+        enter("term");
+
+        while(isInSet(scanner.getToken(),termOperators)){
+            scanner.nextToken();
+        }
+
+        nextUnit();
+
+        exit("term");
     }
     
     protected void nextUnit(){
         enter("unit");
         switch (scanner.getToken()){
-            case nameToken: {nextCallOrVariable();break;}
+            case nameToken: {
+                scanner.nextToken();
+                switch(scanner.getToken()){
+                    case openParenToken: {
+                        scanner.nextToken();
+                        nextArguments();
+                        nextExpected(closeParenToken);
+                        break;
+                    }
+                    case openBracketToken: {
+                        scanner.nextToken();
+                        nextExpression();
+                        nextExpected(closeBracketToken);
+                        break;
+                    }
+                    default: break;
+                }
+                break;
+            }
             case openParenToken: {
                 scanner.nextToken();
                 nextExpression();
@@ -136,8 +351,21 @@ public class Parser extends Common{
             }
             case stringConstantToken:
             case intConstantToken: {scanner.nextToken();break;}
-            default: {source.error("Unexpected symbol");break;}
+            default: {nextExpected(nameToken,openParenToken,stringConstantToken,intConstantToken);}
         }
+    }
+
+    protected void nextArguments(){
+        enter("arguments");
+
+        nextExpression();
+
+        while(scanner.getToken() == commaToken){
+            scanner.nextToken();
+            nextExpression();
+        }
+
+        exit("arguments");
     }
 
     protected void nextExpected(int token){
@@ -148,7 +376,7 @@ public class Parser extends Common{
         }
     }
 
-    protected void nextExpected(int[] tokens){
+    protected void nextExpected(int... tokens){
         boolean expected = false;
         for (int token : tokens) {
             if (scanner.getToken() == token) {
