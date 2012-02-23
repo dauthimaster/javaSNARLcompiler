@@ -354,7 +354,12 @@ public class Parser extends Common{
             }
             case stringConstantToken:
             case intConstantToken: {scanner.nextToken();break;}
-            default: {nextExpected(nameToken,openParenToken,stringConstantToken,intConstantToken);}
+            default: {nextExpected(
+                    nameToken,
+                    openParenToken,
+                    stringConstantToken,
+                    intConstantToken);
+            }
         }
     }
 
