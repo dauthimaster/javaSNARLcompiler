@@ -57,6 +57,7 @@ public class Parser extends Common{
             scanner.nextToken();
             nextProgramPart();
         }
+        nextExpected(endFileToken);
         exit("program");
     }
 
