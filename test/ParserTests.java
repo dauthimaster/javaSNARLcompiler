@@ -130,9 +130,174 @@ public class ParserTests extends TestCase{
         }
     }
     
-    
+    public void testArgumentsSingle(){
+        Source source = new Source(new StringReader("(1 or 0)"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextArguments();
+        } catch (SnarlCompilerException e){
+            fail("1 or 0 is an argument " + e.message);
+        }
+    }
 
-    public void testExpression(){
+    public void testArgumentsMulti(){
+        Source source = new Source(new StringReader("(1 or 0, 2, 13)"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextArguments();
+        } catch (SnarlCompilerException e){
+            fail("1 or 0, 2, 13 are arguments " + e.message);
+        }
+    }
+
+    public void testArgumentsFail(){
+        Source source = new Source(new StringReader("(1 or 0 2)"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextArguments();
+            fail("1 or 0 2 is missing a comma");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+    
+    public void testTermNoOp(){
+        Source source = new Source(new StringReader("2"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextTerm();
+        } catch (SnarlCompilerException e){
+            fail("2 is a term " + e.message);
+        }
+    }
+
+    public void testTermOneOp(){
+        Source source = new Source(new StringReader("-2"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextTerm();
+        } catch (SnarlCompilerException e){
+            fail("-2 is a term " + e.message);
+        }
+    }
+
+    public void testTermMultiOp(){
+        Source source = new Source(new StringReader("-not-not-2"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextTerm();
+        } catch (SnarlCompilerException e){
+            fail("-not-not-2 is a term " + e.message);
+        }
+    }
+    
+    public void testProductSingle(){
+        Source source = new Source(new StringReader("5"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextProduct();
+        } catch (SnarlCompilerException e){
+            fail("5 is a product " + e.message);
+        }
+    }
+    
+    public void testProductNorm(){
+        Source source = new Source(new StringReader("5 * 7"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextProduct();
+        } catch (SnarlCompilerException e){
+            fail("5 * 7 is a product " + e.message);
+        }
+    }
+
+    public void testProductMulti(){
+        Source source = new Source(new StringReader("5 * 7 / 5"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProduct();
+        } catch (SnarlCompilerException e){
+            fail("5 * 7 / 5 is a product " + e.message);
+        }
+    }
+    
+    public void testSumSingle(){
+        Source source = new Source(new StringReader("3"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextSum();
+        } catch (SnarlCompilerException e){
+            fail("3 is a sum " + e.message);
+        }
+    }
+
+    public void testSumNorm(){
+        Source source = new Source(new StringReader("3 + 5"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextSum();
+        } catch (SnarlCompilerException e){
+            fail("3 + 5 is a sum " + e.message);
+        }
+    }
+
+    public void testSumMulti(){
+        Source source = new Source(new StringReader("3 + 5 - 8"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextSum();
+        } catch (SnarlCompilerException e){
+            fail("3 + 5 - 8 is a sum " + e.message);
+        }
+    }
+    
+    public void testComparisonSingle(){
+        Source source = new Source(new StringReader("42"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextComparison();
+        } catch (SnarlCompilerException e){
+            fail("42 is a comparison " + e.message);
+        }
+    }
+
+    public void testComparisonNorm(){
+        Source source = new Source(new StringReader("42 > 11"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextComparison();
+        } catch (SnarlCompilerException e){
+            fail("42 > 11 is a comparison " + e.message);
+        }
+    }
+
+    public void testComparisonFail(){
+        Source source = new Source(new StringReader("42 > 11 > -5"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextComparison();
+            fail("42 > 11 > -5 is not a comparison");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+                   
+    public void testExpressionNorm(){
         Source source = new Source(new StringReader("2 or 1"));
         Parser parser = new Parser(source);
         

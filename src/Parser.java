@@ -161,12 +161,7 @@ public class Parser extends Common{
         nextExpected(nameToken);
         
         switch(scanner.getToken()){
-            case openParenToken: {
-                scanner.nextToken();
-                nextArguments();
-                nextExpected(closeParenToken);
-                break;
-            }
+            case openParenToken: {nextArguments();break;}
             case openBracketToken: {
                 scanner.nextToken();
                 nextExpression();
@@ -284,6 +279,10 @@ public class Parser extends Common{
             nextSum();
         }
         
+        if(isInSet(scanner.getToken(), comparisonOperators)){
+            throw new SnarlCompilerException("Chaining comparison operators is not allowed");
+        }
+        
         exit("comparison");
     }
     
@@ -331,14 +330,7 @@ public class Parser extends Common{
             case nameToken: {
                 scanner.nextToken();
                 switch(scanner.getToken()){
-                    case openParenToken: {
-                        scanner.nextToken();
-                        if(scanner.getToken() != closeParenToken){
-                            nextArguments();
-                        }
-                        nextExpected(closeParenToken);
-                        break;
-                    }
+                    case openParenToken: {nextArguments();break;}
                     case openBracketToken: {
                         scanner.nextToken();
                         nextExpression();
@@ -368,13 +360,19 @@ public class Parser extends Common{
 
     protected void nextArguments(){
         enter("arguments");
+        
+        nextExpected(openParenToken);
 
-        nextExpression();
-
-        while(scanner.getToken() == commaToken){
-            scanner.nextToken();
+        if(scanner.getToken() != closeParenToken){
             nextExpression();
+
+            while(scanner.getToken() == commaToken){
+                scanner.nextToken();
+                nextExpression();
+            }
         }
+
+        nextExpected(closeParenToken);
 
         exit("arguments");
     }
