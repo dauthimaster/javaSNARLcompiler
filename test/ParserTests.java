@@ -3,16 +3,14 @@ import junit.framework.*;
 import java.io.StringReader;
 
 public class ParserTests extends TestCase{
-    private Parser parser;
-    private Source source;
     
     public ParserTests(String name){
         super(name);
     }
     
     public void testMakeSet(){
-        source = new Source(new StringReader("ignored"));
-        parser = new Parser(source);
+        Source source = new Source(new StringReader("ignored"));
+        Parser parser = new Parser(source);
         
         long oneTwoThree = parser.makeSet(1,2,3);
         long fourFiveSix = parser.makeSet(4,5,6);
@@ -29,8 +27,8 @@ public class ParserTests extends TestCase{
     }
     
     public void testIsInSet(){
-        source = new Source(new StringReader("ignored"));
-        parser = new Parser(source);
+        Source source = new Source(new StringReader("ignored"));
+        Parser parser = new Parser(source);
         
         long oneTwoThree = parser.makeSet(1,2,3);
         long fourFiveSix = parser.makeSet(4,5,6);
@@ -43,14 +41,100 @@ public class ParserTests extends TestCase{
         assertTrue(parser.isInSet(6,fourFiveSix));
     }
 
-    public void testUnit(){
-        source = new Source(new StringReader(""));
+    public void testUnitOpenParen(){
+        Source source = new Source(new StringReader("(0 or 1)"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextUnit();
+        } catch (SnarlCompilerException e){
+            fail("(0 or 1) is a unit " + e.message);
+        }
+    }
 
+    public void testUnitInt(){
+        Source source = new Source(new StringReader("1234"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextUnit();
+        } catch (SnarlCompilerException e){
+            fail("1234 is a unit " + e.message);
+        }
+    }
+
+    public void testUnitString(){
+        Source source = new Source(new StringReader("\"JUnit <3\""));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextUnit();
+        } catch (SnarlCompilerException e){
+            fail("\"JUnit <3\" is a unit " + e.message);
+        }
+    }
+
+    public void testUnitName(){
+        Source source = new Source(new StringReader("manBearPig"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextUnit();
+        } catch (SnarlCompilerException e){
+            fail("manBearPig is a unit " + e.message);
+        }
+    }
+
+    public void testUnitNameOpenParenNoArgs(){
+        Source source = new Source(new StringReader("manBearPig()"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextUnit();
+        } catch (SnarlCompilerException e){
+            fail("manBearPig() is a unit " + e.message);
+        }
+    }
+
+    public void testUnitNameOpenParenArgs(){
+        Source source = new Source(new StringReader("manBearPig(1 or 0)"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextUnit();
+        } catch (SnarlCompilerException e){
+            fail("manBearPig(1 or 0) is a unit " + e.message);
+        }
+    }
+
+    public void testUnitNameOpenBracket(){
+        Source source = new Source(new StringReader("manBearPig[1 or 0]"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextUnit();
+        } catch (SnarlCompilerException e){
+            fail("manBearPig[1 or 0] is a unit " + e.message);
+        }
     }
     
+    public void testUnitFailure(){
+        Source source = new Source(new StringReader("manBearPig(]"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextUnit();
+            fail("manBearPig(] is not a unit");
+        } catch (SnarlCompilerException ignore){
+            assertTrue(true);
+        }
+    }
+    
+    
+
     public void testExpression(){
-        source = new Source(new StringReader("2 or 1"));
-        parser = new Parser(source);
+        Source source = new Source(new StringReader("2 or 1"));
+        Parser parser = new Parser(source);
         
         try{
             parser.nextExpression();

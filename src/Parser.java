@@ -332,7 +332,9 @@ public class Parser extends Common{
                 switch(scanner.getToken()){
                     case openParenToken: {
                         scanner.nextToken();
-                        nextArguments();
+                        if(scanner.getToken() != closeParenToken){
+                            nextArguments();
+                        }
                         nextExpected(closeParenToken);
                         break;
                     }
