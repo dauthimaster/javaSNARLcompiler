@@ -666,6 +666,270 @@ public class ParserTests extends TestCase{
         Source source = new Source(new StringReader("meow := 1"));
         Parser parser = new Parser(source);
 
-        assertTrue(true);
+        try{
+            parser.nextStatement();
+        } catch (SnarlCompilerException e){
+            fail("meow := 1 is a statement " + e.message);
+        }
+    }
+
+    public void testStatementBegin(){
+        Source source = new Source(new StringReader("begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextStatement();
+        } catch (SnarlCompilerException e){
+            fail("begin end is a statement " + e.message);
+        }
+    }
+
+    public void testStatementCode(){
+        Source source = new Source(new StringReader("code \"blah\""));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextStatement();
+        } catch (SnarlCompilerException e){
+            fail("code \"blah\" is a statement " + e.message);
+        }
+    }
+
+    public void testStatementIf(){
+        Source source = new Source(new StringReader("if 1 then begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextStatement();
+        } catch (SnarlCompilerException e){
+            fail("if 1 then begin end is a statement " + e.message);
+        }
+    }
+
+    public void testStatementValue(){
+        Source source = new Source(new StringReader("value 1"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextStatement();
+        } catch (SnarlCompilerException e){
+            fail("value 1 is a statement " + e.message);
+        }
+    }
+
+    public void testStatementWhile(){
+        Source source = new Source(new StringReader("while 1 do begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextStatement();
+        } catch (SnarlCompilerException e){
+            fail("while 1 do begin end is a statement " + e.message);
+        }
+    }
+    
+    public void testStatementFail(){
+        Source source = new Source(new StringReader("1 < 2"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextStatement();
+            fail("1 < 2 is not a statement.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+    
+    public void testBodyNoDeclarations(){
+        Source source = new Source(new StringReader("begin end"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextBody();
+        } catch (SnarlCompilerException e){
+            fail("begin end is a body statement " + e.message);
+        }
+    }
+
+    public void testBodySingleDeclaration(){
+        Source source = new Source(new StringReader("int top begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextBody();
+        } catch (SnarlCompilerException e){
+            fail("int top begin end is a body statement " + e.message);
+        }
+    }
+
+    public void testBodyMultiDeclarations(){
+        Source source = new Source(new StringReader("int top; int bottom begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextBody();
+        } catch (SnarlCompilerException e){       
+            fail("int top; int bottom begin end is a body statement " + e.message);
+        }
+    }
+    
+    public void testParametersSingle(){
+        Source source = new Source(new StringReader("(int top)"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextParameters();
+        } catch (SnarlCompilerException e){
+            fail("(int top) is a parameter " + e.message);
+        }
+    }
+
+    public void testParametersMulti(){
+        Source source = new Source(new StringReader("(int top, int bottom)"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextParameters();
+        } catch (SnarlCompilerException e){
+            fail("(int top, int bottom are parameters)" + e.message);
+        }
+    }
+
+    public void testParametersFailOpenParen(){
+        Source source = new Source(new StringReader("int top)"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextParameters();
+            fail("int top) is not a parameter.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+
+    public void testParametersFailCloseParen(){
+        Source source = new Source(new StringReader("(int top"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextParameters();
+            fail("(int top is not a parameter.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+    
+    public void testProcedureNoParams(){
+        Source source = new Source(new StringReader("proc rescue() int: begin end"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextProcedure();
+        } catch (SnarlCompilerException e){
+            fail("proc rescue() int: begin end is a procedure " + e.message);
+        }
+    }
+
+    public void testProcedureParams(){
+        Source source = new Source(new StringReader("proc rescue(int top) int: begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProcedure();
+        } catch (SnarlCompilerException e){
+            fail("proc rescue(int top) int: begin end is a procedure " + e.message);
+        }
+    }
+
+    public void testProcedureString(){
+        Source source = new Source(new StringReader("proc rescue() string: begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProcedure();
+        } catch (SnarlCompilerException e){
+            fail("proc rescue() string: begin end is a procedure " + e.message);
+        }
+    }
+
+    public void testProcedureFailProc(){
+        Source source = new Source(new StringReader("pro rescue() int: begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProcedure();
+            fail("pro rescue() int: begin end is not a procedure.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+
+    public void testProcedureFailName(){
+        Source source = new Source(new StringReader("proc () int: begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProcedure();
+            fail("proc () int: begin end is not a procedure.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+
+    public void testProcedureFailNoIntString(){
+        Source source = new Source(new StringReader("proc rescue() : begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProcedure();
+            fail("proc rescue() : begin end is not a procedure.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+
+    public void testProcedureFailColon(){
+        Source source = new Source(new StringReader("proc rescue() int begin end"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProcedure();
+            fail("proc rescue() int begin end is not a procedure.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+    
+    public void testDeclarationInt(){
+        Source source = new Source(new StringReader("int sleep"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextDeclaration();
+        } catch (SnarlCompilerException e){
+            fail("int sleep is a declaration " + e.message);
+        }
+    }
+
+    public void testDeclarationString(){
+        Source source = new Source(new StringReader("string sleep"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextDeclaration();
+        } catch (SnarlCompilerException e){
+            fail("string sleep is a declaration " + e.message);
+        }
+    }
+
+    public void testDeclarationOpenBracket(){
+        Source source = new Source(new StringReader("[10]int sleep"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextDeclaration();
+        } catch (SnarlCompilerException e){
+            fail("[10]int sleep is a declaration " + e.message);
+        }
     }
 }

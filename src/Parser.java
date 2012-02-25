@@ -90,16 +90,11 @@ public class Parser extends Common{
 
     protected void nextProcedure(){
         enter("procedure");
-        scanner.nextToken();
-
+        nextExpected(boldProcToken);
         nextExpected(nameToken);
-        nextExpected(openParenToken);
 
-        if(scanner.getToken() != closeParenToken){
-            nextParameters();
-        }
+        nextParameters();
 
-        nextExpected(closeParenToken);
         nextExpected(boldIntToken, boldStringToken);
         nextExpected(colonToken);
 
@@ -111,12 +106,18 @@ public class Parser extends Common{
     protected void nextParameters(){
         enter("parameters");
 
-        nextDeclaration();
+        nextExpected(openParenToken);
 
-        while(scanner.getToken() == commaToken){
-            scanner.nextToken();
+        if (scanner.getToken() != closeParenToken) {
             nextDeclaration();
+
+            while(scanner.getToken() == commaToken){
+                scanner.nextToken();
+                nextDeclaration();
+            }
         }
+
+        nextExpected(closeParenToken);
 
         exit("parameters");
     }
