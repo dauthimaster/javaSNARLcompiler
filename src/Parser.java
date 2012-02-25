@@ -172,6 +172,12 @@ public class Parser extends Common{
                 nextExpression();
                 break;
             }
+            default: {
+                nextExpected(
+                        openParenToken,
+                        openBracketToken,
+                        colonEqualToken);
+            }
         }
         
         exit("assignment or call statement");
@@ -216,6 +222,7 @@ public class Parser extends Common{
         nextStatement();
         
         if(scanner.getToken() == boldElseToken){
+            scanner.nextToken();
             nextStatement();
         }
         
@@ -278,7 +285,7 @@ public class Parser extends Common{
             scanner.nextToken();
             nextSum();
         }
-        
+
         if(isInSet(scanner.getToken(), comparisonOperators)){
             throw new SnarlCompilerException("Chaining comparison operators is not allowed");
         }

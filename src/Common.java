@@ -11,7 +11,7 @@ class Common
 { 
   public  static final char    eofChar = '\u0000';  //  End of source sentinel.
   private static       int     level   = 0;         //  Parser recursion level.
-  public  static final boolean tracing = true;      //  Enable ENTER/EXIT.
+  public  static final boolean tracing = false;      //  Enable ENTER/EXIT.
 
 //  Token numbers.
 

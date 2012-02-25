@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7476434a-e30c-4a80-8bf7-cd4b31259e5f" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Common.java" afterPath="$PROJECT_DIR$/src/Common.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Parser.java" afterPath="$PROJECT_DIR$/src/Parser.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/ParserTests.java" afterPath="$PROJECT_DIR$/test/ParserTests.java" />
     </list>
@@ -60,7 +61,7 @@
     <favorites_list name="javaSNARLcompiler" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5">
+    <splitter split-orientation="horizontal" split-proportion="0.6092943">
       <split-first>
         <leaf>
           <file leaf-file-name="Scanner.java" pinned="false" current="false" current-in-tab="false">
@@ -77,7 +78,7 @@
           <file leaf-file-name="ParserTests.java" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/test/ParserTests.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="297" column="5" selection-start="8603" selection-end="8603" vertical-scroll-proportion="0.8770492">
+                <state line="668" column="23" selection-start="20676" selection-end="20676" vertical-scroll-proportion="0.8877246">
                   <folding />
                 </state>
               </provider>
@@ -95,7 +96,7 @@
           <file leaf-file-name="Common.java" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/Common.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="39" column="0" selection-start="1560" selection-end="1560" vertical-scroll-proportion="0.0">
+                <state line="42" column="83" selection-start="1768" selection-end="1768" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -108,7 +109,7 @@
           <file leaf-file-name="Parser.java" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/Parser.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="283" column="10" selection-start="7329" selection-end="7329" vertical-scroll-proportion="0.8449612">
+                <state line="179" column="13" selection-start="4947" selection-end="4947" vertical-scroll-proportion="0.9266467">
                   <folding />
                 </state>
               </provider>
@@ -131,12 +132,12 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/Common.java" />
         <option value="$PROJECT_DIR$/src/example.snarl" />
         <option value="$PROJECT_DIR$/test/ScannerTests.java" />
         <option value="$PROJECT_DIR$/src/SnarlCompilerException.java" />
         <option value="$PROJECT_DIR$/src/Source.java" />
         <option value="$PROJECT_DIR$/src/Scanner.java" />
+        <option value="$PROJECT_DIR$/src/Common.java" />
         <option value="$PROJECT_DIR$/src/Parser.java" />
         <option value="$PROJECT_DIR$/test/ParserTests.java" />
       </list>
@@ -505,7 +506,7 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24948665" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39745402" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39745402" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -579,11 +580,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/example.snarl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="39" selection-start="377" selection-end="378" vertical-scroll-proportion="-11.4" />
-      </provider>
-    </entry>
     <entry file="jar:///usr/lib/jvm/java-6-sun/jre/lib/rt.jar!/java/lang/Object.class">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
@@ -608,13 +604,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Common.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="39" column="0" selection-start="1560" selection-end="1560" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Scanner.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="199" column="59" selection-start="6212" selection-end="6216" vertical-scroll-proportion="-8.28">
@@ -629,16 +618,30 @@
         <state line="0" column="0" selection-start="0" selection-end="49" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Common.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="42" column="83" selection-start="1768" selection-end="1768" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/example.snarl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="39" selection-start="377" selection-end="378" vertical-scroll-proportion="0.022727273">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Parser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="283" column="10" selection-start="7329" selection-end="7329" vertical-scroll-proportion="0.8449612">
+        <state line="179" column="13" selection-start="4947" selection-end="4947" vertical-scroll-proportion="0.9266467">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/ParserTests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="297" column="5" selection-start="8603" selection-end="8603" vertical-scroll-proportion="0.8770492">
+        <state line="668" column="23" selection-start="20676" selection-end="20676" vertical-scroll-proportion="0.8877246">
           <folding />
         </state>
       </provider>
