@@ -32,12 +32,21 @@ public class Parser extends Common{
     protected Source source;                        //Source for calling error in main
 
     //Constructor. Returns a new Parser positioned at the first unignored token.
-
+    
     public Parser(Source source){
         this.source = source;
         scanner = new Scanner(source);
     }
-
+    
+   /* protected void errorRecoveryExample(){
+        if(!isInSet(scanner.getToken(), declarationTokens)){
+            source.recoverableError("message");
+            while (! isInSet(scanner.getToken(), declarationFollowSet)){
+                source.nextChar();
+            }
+        }
+    }
+     */
     //MakeSet. Returns a set of the elements.
 
     protected long makeSet(int... elements){
