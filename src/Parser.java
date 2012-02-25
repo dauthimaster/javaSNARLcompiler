@@ -1,41 +1,44 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
-/**
- * Created by IntelliJ IDEA.
- * User: dauthimaster
- * Date: 1/28/12
- * Time: 3:28 PM
- * To change this template use File | Settings | File Templates.
+/*
+SNARL/Parser
+
+James Current
+1/30/12
  */
 public class Parser extends Common{
-    protected Scanner scanner;
-    protected long comparisonOperators = makeSet(
+    protected Scanner scanner;                      //Parser pulls tokens from Scanner
+    protected long comparisonOperators = makeSet(   //Set of comparison operators
             equalToken,
             greaterToken,
             lessToken,
             lessEqualToken,
             greaterEqualToken,
             lessGreaterToken);
-    protected long sumOperators = makeSet(
+    protected long sumOperators = makeSet(          //Set of sum operators
             plusToken,
             dashToken);
-    protected long productOperators = makeSet(
+    protected long productOperators = makeSet(      //Set of product operators
             starToken,
             slashToken);
-    protected long termOperators = makeSet(
+    protected long termOperators = makeSet(         //Set of term operators
             dashToken,
             boldNotToken);
-    protected long declarationTokens = makeSet(
+    protected long declarationTokens = makeSet(     //Set of tokens that can start a declaration
             boldIntToken,
             boldStringToken,
             openBracketToken);
-    protected Source source;
-    
+    protected Source source;                        //Source for calling error in main
+
+    //Constructor. Returns a new Parser positioned at the first unignored token.
+
     public Parser(Source source){
         this.source = source;
         scanner = new Scanner(source);
     }
+
+    //MakeSet. Returns a set of the elements.
 
     protected long makeSet(int... elements){
         long set = 0L;
@@ -45,10 +48,13 @@ public class Parser extends Common{
         return set;
     }
     
-    //test if element is in set
+    //IsInSet. Tests if element is in set.
+
     protected boolean isInSet(int element, long set){
         return (set & (1L << element)) != 0L;
     }
+
+    //NextProgram. Parses the next program.
 
     public void nextProgram(){
         enter("program");
@@ -61,6 +67,8 @@ public class Parser extends Common{
         exit("program");
     }
 
+    //NextProgramPart. Parses the next program part.
+
     protected void nextProgramPart(){
         enter("program part");
         if(isInSet(scanner.getToken(), declarationTokens)){
@@ -72,6 +80,8 @@ public class Parser extends Common{
         }
         exit("program part");
     }
+
+    //NextDeclaration. Parses the next declaration.
     
     protected void nextDeclaration(){
         enter("declaration");
@@ -88,6 +98,8 @@ public class Parser extends Common{
         exit("declaration");
     }
 
+    //NextProcedure. Parses the next procedure.
+
     protected void nextProcedure(){
         enter("procedure");
         nextExpected(boldProcToken);
@@ -102,6 +114,8 @@ public class Parser extends Common{
 
         exit("procedure");
     }
+
+    //NextParameters. Parses the next parameters.
 
     protected void nextParameters(){
         enter("parameters");
@@ -122,6 +136,8 @@ public class Parser extends Common{
         exit("parameters");
     }
 
+    //NextBody. Parses the next body.
+
     protected void nextBody(){
         enter("body");
 
@@ -139,6 +155,8 @@ public class Parser extends Common{
 
         exit("body");
     }
+
+    //NextStatement. Parses the next statement.
     
     protected void nextStatement(){
         enter("statement");
@@ -155,6 +173,8 @@ public class Parser extends Common{
         
         exit("statement");
     }
+
+    //NextAssignmentOrCallStatement. Parses the next assignment or call statement.
     
     protected void nextAssignmentOrCallStatement(){
         enter("assignment or call statement");
@@ -183,6 +203,8 @@ public class Parser extends Common{
         
         exit("assignment or call statement");
     }
+
+    //NextBeginStatement. Parses the next begin statement.
     
     protected void nextBeginStatement(){
         enter("begin statement");
@@ -203,6 +225,8 @@ public class Parser extends Common{
         
         exit("begin statement");
     }
+
+    //NextCodeStatement. Parses the next code statement.
     
     protected void nextCodeStatement(){
         enter("code statement");
@@ -212,6 +236,8 @@ public class Parser extends Common{
         
         exit("code statement");
     }
+
+    //NextIfStatement. Parses the next if statement.
     
     protected void nextIfStatement(){
         enter("if statement");
@@ -229,6 +255,8 @@ public class Parser extends Common{
         
         exit("if statement");
     }
+
+    //NextValueStatement. Parses the next value statement.
     
     protected void nextValueStatement(){
         enter("value statement");
@@ -238,6 +266,8 @@ public class Parser extends Common{
         
         exit("value statement");
     }
+
+    //NextWhileStatement. Parses the next while statement.
     
     protected void nextWhileStatement(){
         enter("while statement");
@@ -251,6 +281,8 @@ public class Parser extends Common{
         exit("while statement");
     }
 
+    //NextExpression. Parses the next expression.
+
     protected void nextExpression(){
         enter("expression");
         
@@ -263,6 +295,8 @@ public class Parser extends Common{
         
         exit("expression");
     }
+
+    //NextConjunction. Parses the next conjunction.
     
     protected void nextConjunction(){
         enter("conjunction");
@@ -276,6 +310,8 @@ public class Parser extends Common{
         
         exit("conjunction");
     }
+
+    //NextComparison. Parses the next comparison.
     
     protected void nextComparison(){
         enter("comparison");
@@ -293,7 +329,9 @@ public class Parser extends Common{
         
         exit("comparison");
     }
-    
+
+    //NextSum. Parses the next sum.
+
     protected void nextSum(){
         enter("sum");
         
@@ -306,6 +344,8 @@ public class Parser extends Common{
         
         exit("sum");
     }
+
+    //NextProduct. Parses the next product.
 
     protected void nextProduct(){
         enter("product");
@@ -320,6 +360,8 @@ public class Parser extends Common{
         exit("product");
     }
 
+    //NextTerm. Parses the next term.
+
     protected void nextTerm(){
         enter("term");
 
@@ -331,6 +373,8 @@ public class Parser extends Common{
 
         exit("term");
     }
+
+    //NextUnit. Parses the next unit.
     
     protected void nextUnit(){
         enter("unit");
@@ -364,7 +408,11 @@ public class Parser extends Common{
                     intConstantToken);
             }
         }
+
+        exit("unit");
     }
+
+    //NextArguments. Parses the next arguments.
 
     protected void nextArguments(){
         enter("arguments");
@@ -385,6 +433,8 @@ public class Parser extends Common{
         exit("arguments");
     }
 
+    //NextExpected(int token). Checks to see if the current token is the token passed, if not throws an exception.
+
     protected void nextExpected(int token) throws SnarlCompilerException{
         if(scanner.getToken() == token){
             scanner.nextToken();
@@ -392,6 +442,8 @@ public class Parser extends Common{
             throw new SnarlCompilerException("Expected " + tokenToString(token) + ".");
         }
     }
+
+    //NextExpected(int... tokens). Checks to see if the current token is in tokens, if not throws an exception.
 
     protected void nextExpected(int... tokens) throws SnarlCompilerException{
         boolean expected = false;
@@ -412,6 +464,8 @@ public class Parser extends Common{
             throw new SnarlCompilerException("Expected " + error.toString() + ".");
         }
     }
+
+    //Main.
     
     public static void main(String[] args){
         Parser parser;

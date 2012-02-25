@@ -2,6 +2,12 @@ import junit.framework.*;
 
 import java.io.StringReader;
 
+/*
+SNARL/ParserTests
+
+James Current
+2/20/12
+ */
 public class ParserTests extends TestCase{
     
     public ParserTests(String name){
@@ -930,6 +936,110 @@ public class ParserTests extends TestCase{
             parser.nextDeclaration();
         } catch (SnarlCompilerException e){
             fail("[10]int sleep is a declaration " + e.message);
+        }
+    }
+    
+    public void testDeclarationFail(){
+        Source source = new Source(new StringReader("proc rescue() int: begin end"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextDeclaration();
+            fail("proc rescue() int: begin end is not a declaration.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+    
+    public void testDeclarationFailBrackets(){
+        Source source = new Source(new StringReader("[20]string fail"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextDeclaration();
+            fail("[20]string fail is not a declaration.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+
+    public void testDeclarationFailName(){
+        Source source = new Source(new StringReader("int string fail"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextDeclaration();
+            fail("int string fail is not a declaration.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+    
+    public void testProgramPartDeclaration(){
+        Source source = new Source(new StringReader("int meow"));
+        Parser parser = new Parser(source);
+        
+        try{             
+            parser.nextProgramPart();
+        } catch (SnarlCompilerException e){
+            fail("int meow is a program part " + e.message);
+        }
+    }
+                     
+    public void testProgramPartProcedure(){
+        Source source = new Source(new StringReader("proc rescue() int: begin end"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextProgramPart();
+        } catch (SnarlCompilerException e){
+            fail("proc rescue() int: begin end is a program part " + e.message);
+        }
+    }
+    
+    public void testProgramPartFail(){
+        Source source = new Source(new StringReader("meow := \"cat\""));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextProgramPart();
+            fail("meow := \"cat\" is not a program part.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+
+    public void testProgramSingle(){
+        Source source = new Source(new StringReader("int meow"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextProgram();
+        } catch (SnarlCompilerException e){
+            fail("int meow is a program");
+        }
+    }
+
+    public void testProgramMulti(){
+        Source source = new Source(new StringReader("int meow; int mug"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProgram();
+        } catch (SnarlCompilerException e){
+            fail("int meow; int mug is a program");
+        }
+    }
+
+    public void testProgramFail(){
+        Source source = new Source(new StringReader("meow := 42"));
+        Parser parser = new Parser(source);
+
+        try{
+            parser.nextProgram();
+            fail("meow := 42 is not a program.");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
         }
     }
 }
