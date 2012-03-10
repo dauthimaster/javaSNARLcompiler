@@ -1,16 +1,16 @@
-/**
- * Created by IntelliJ IDEA.
- * User: dauthimaster
- * Date: 3/6/12
- * Time: 7:24 PM
- * To change this template use File | Settings | File Templates.
+/*
+  Boss
+
+  James Current
+  Date: 3/6/12
+  Time: 7:24 PM
  */
 public class Boss {
-    private BasicType person;
-    private BasicType adult;
-    private BasicType child;
-    private BasicType man;
-    private BasicType woman;
+    private BasicType person;   //Person Type
+    private BasicType adult;    //Adult Type
+    private BasicType child;    //Child Type
+    private BasicType man;      //Man Type
+    private BasicType woman;    //Woman Type
     private BasicType boy;
     private BasicType girl;
 
