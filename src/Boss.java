@@ -11,9 +11,10 @@ public class Boss {
     private BasicType child;    //Child Type
     private BasicType man;      //Man Type
     private BasicType woman;    //Woman Type
-    private BasicType boy;
-    private BasicType girl;
+    private BasicType boy;      //Boy Type
+    private BasicType girl;     //Girl Type
 
+    //Constructor. Returns a new Boss with the proper relationships between its types.
     public Boss(){
         person = new BasicType("person",Type.wordSize,null);
         adult = new BasicType("adult",Type.wordSize,person);
