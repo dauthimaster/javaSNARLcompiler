@@ -13,7 +13,7 @@ public class Scanner extends Common{
     protected Source source; //read chars from here
     protected String tokenString; //current token as string
     protected int tokenInt; //current token as int
-    protected Hashtable <String,Integer>reserved = new Hashtable<String,Integer>(15); // Hashtable of reserved names
+    protected Hashtable <String,Integer>reserved = new Hashtable<String,Integer>(15,1); // Hashtable of reserved names
 
     //CONSTRUCTOR. Return a new Scanner positioned at the beginning of the file and with a populated Hashtable
 
