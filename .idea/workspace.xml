@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7476434a-e30c-4a80-8bf7-cd4b31259e5f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Scanner.java" afterPath="$PROJECT_DIR$/src/Scanner.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/SymbolTable.java" afterPath="$PROJECT_DIR$/src/SymbolTable.java" />
     </list>
     <ignored path="javaSNARLcompiler.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -60,10 +60,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Scanner.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Scanner.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Scanner.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="84" selection-start="495" selection-end="495" vertical-scroll-proportion="-0.067567565">
+            <state line="15" column="84" selection-start="495" selection-end="495" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -116,14 +116,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SymbolTable.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="SymbolTable.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="55" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
+            <state line="14" column="0" selection-start="272" selection-end="272" vertical-scroll-proportion="0.3153153">
               <folding>
-                <element signature="e#0#2340#0" expanded="true" />
+                <element signature="e#0#2394#0" expanded="true" />
                 <element signature="imports" expanded="true" />
-                <element signature="e#2145#2152#0" expanded="true" />
+                <element signature="e#2199#2206#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -189,8 +189,8 @@
         <option value="$PROJECT_DIR$/src/Scope.java" />
         <option value="$PROJECT_DIR$/src/Parser.java" />
         <option value="$PROJECT_DIR$/test/SymbolTableTests.java" />
-        <option value="$PROJECT_DIR$/src/SymbolTable.java" />
         <option value="$PROJECT_DIR$/src/Scanner.java" />
+        <option value="$PROJECT_DIR$/src/SymbolTable.java" />
       </list>
     </option>
   </component>
@@ -771,17 +771,6 @@
         <state line="4" column="5" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="55" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#0#2340#0" expanded="true" />
-            <element signature="imports" expanded="true" />
-            <element signature="e#2145#2152#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/SymbolTableTests.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="139" column="80" selection-start="4545" selection-end="4545" vertical-scroll-proportion="0.0">
@@ -816,9 +805,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Scanner.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="84" selection-start="495" selection-end="495" vertical-scroll-proportion="-0.067567565">
+        <state line="15" column="84" selection-start="495" selection-end="495" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="0" selection-start="272" selection-end="272" vertical-scroll-proportion="0.3153153">
+          <folding>
+            <element signature="e#0#2394#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#2199#2206#0" expanded="true" />
           </folding>
         </state>
       </provider>

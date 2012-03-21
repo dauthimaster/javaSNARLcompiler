@@ -11,6 +11,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 
                         //TODO: comment EVERYTHING!!!
+//Implements a symbol table using a table of stacks.
+
 public class SymbolTable {
     protected Hashtable<String, LinkedList<Scope>> table;
     protected int level;
