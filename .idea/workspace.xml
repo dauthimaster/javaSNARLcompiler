@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7476434a-e30c-4a80-8bf7-cd4b31259e5f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Boss.java" afterPath="$PROJECT_DIR$/src/Boss.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Scope.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/SymbolTable.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/SymbolTableTests.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="javaSNARLcompiler.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -63,7 +66,7 @@
       <file leaf-file-name="Scanner.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Scanner.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="238" column="10" selection-start="7433" selection-end="7437" vertical-scroll-proportion="0.0">
+            <state line="2" column="18" selection-start="65" selection-end="93" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -72,16 +75,7 @@
       <file leaf-file-name="ParserTests.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/ParserTests.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="0" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ScannerTests.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/ScannerTests.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="49" vertical-scroll-proportion="0.0">
+            <state line="56" column="0" selection-start="1627" selection-end="1627" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -108,7 +102,16 @@
       <file leaf-file-name="Type.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Type.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="245" column="102" selection-start="5369" selection-end="5369" vertical-scroll-proportion="0.0">
+            <state line="182" column="42" selection-start="3816" selection-end="3816" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Boss.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Boss.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="47" column="95" selection-start="1769" selection-end="1769" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -117,17 +120,43 @@
       <file leaf-file-name="Descriptor.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Descriptor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="18" selection-start="21" selection-end="21" vertical-scroll-proportion="0.0">
+            <state line="0" column="0" selection-start="0" selection-end="74" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Boss.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Boss.java">
+      <file leaf-file-name="SymbolTable.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="16" column="86" selection-start="480" selection-end="480" vertical-scroll-proportion="0.16483517">
-              <folding />
+            <state line="17" column="55" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="e#0#2340#0" expanded="true" />
+                <element signature="imports" expanded="true" />
+                <element signature="e#2145#2152#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SymbolTableTests.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/SymbolTableTests.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="139" column="80" selection-start="4545" selection-end="4545" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="e#0#5143#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Scope.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Scope.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="13" column="0" selection-start="349" selection-end="349" vertical-scroll-proportion="0.2927928">
+              <folding>
+                <element signature="e#0#477#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -154,9 +183,15 @@
         <option value="$PROJECT_DIR$/src/Scanner.java" />
         <option value="$PROJECT_DIR$/test/ParserTests.java" />
         <option value="$PROJECT_DIR$/src/Common.java" />
-        <option value="$PROJECT_DIR$/src/Parser.java" />
         <option value="$PROJECT_DIR$/src/Descriptor.java" />
         <option value="$PROJECT_DIR$/src/Boss.java" />
+        <option value="$PROJECT_DIR$/src/ListNode.java" />
+        <option value="$PROJECT_DIR$/src/StackNode.java" />
+        <option value="$PROJECT_DIR$/src/LinkedStack.java" />
+        <option value="$PROJECT_DIR$/src/Scope.java" />
+        <option value="$PROJECT_DIR$/src/Parser.java" />
+        <option value="$PROJECT_DIR$/test/SymbolTableTests.java" />
+        <option value="$PROJECT_DIR$/src/SymbolTable.java" />
       </list>
     </option>
   </component>
@@ -195,7 +230,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -311,6 +345,7 @@
         </subPane>
       </pane>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -326,11 +361,11 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="dynamic.classpath" value="false" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
+    <property name="dynamic.classpath" value="false" />
   </component>
-  <component name="RunManager" selected="Application.Boss">
+  <component name="RunManager" selected="JUnit.SymbolTableTests">
     <configuration default="false" name="Parser" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="Parser" />
       <option name="VM_PARAMETERS" />
@@ -375,6 +410,28 @@
       <ConfigurationWrapper RunnerId="Run" />
       <method />
     </configuration>
+    <configuration default="false" name="SymbolTableTests" type="JUnit" factoryName="JUnit" temporary="true">
+      <module name="javaSNARLcompiler" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="SymbolTableTests" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <envs />
+      <patterns />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method />
+    </configuration>
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m" />
@@ -395,6 +452,24 @@
       <method>
         <option name="AntTarget" enabled="false" />
         <option name="BuildArtifacts" enabled="false" />
+        <option name="Maven.BeforeRunTask" enabled="false" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <method>
+        <option name="AntTarget" enabled="false" />
+        <option name="BuildArtifacts" enabled="false" />
+        <option name="Make" enabled="true" />
         <option name="Maven.BeforeRunTask" enabled="false" />
       </method>
     </configuration>
@@ -423,24 +498,6 @@
       <envs />
       <properties />
       <listeners />
-      <method>
-        <option name="AntTarget" enabled="false" />
-        <option name="BuildArtifacts" enabled="false" />
-        <option name="Make" enabled="true" />
-        <option name="Maven.BeforeRunTask" enabled="false" />
-      </method>
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method>
         <option name="AntTarget" enabled="false" />
         <option name="BuildArtifacts" enabled="false" />
@@ -520,10 +577,11 @@
       <ConfigurationWrapper RunnerId="Run" />
       <method />
     </configuration>
-    <list size="3">
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Application.Parser" />
       <item index="1" class="java.lang.String" itemvalue="JUnit.ParserTests" />
       <item index="2" class="java.lang.String" itemvalue="Application.Boss" />
+      <item index="3" class="java.lang.String" itemvalue="JUnit.SymbolTableTests" />
     </list>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
@@ -557,6 +615,26 @@
     </task>
     <servers />
   </component>
+  <component name="TodoView" selected-index="0">
+    <todo-panel id="selected-file">
+      <are-packages-shown value="false" />
+      <are-modules-shown value="false" />
+      <flatten-packages value="false" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <are-modules-shown value="false" />
+      <flatten-packages value="false" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="default-changelist">
+      <are-packages-shown value="false" />
+      <are-modules-shown value="false" />
+      <flatten-packages value="false" />
+      <is-autoscroll-to-source value="false" />
+    </todo-panel>
+  </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="24" width="1442" height="857" extended-state="6" />
     <editor active="true" />
@@ -569,12 +647,12 @@
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3283582" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32911393" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295688" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16511127" sideWeight="0.6751055" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32489452" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16511127" sideWeight="0.6708861" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32489452" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -663,16 +741,6 @@
         <state line="60" column="0" selection-start="1116" selection-end="1116" vertical-scroll-proportion="0.95454544" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Scanner.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="238" column="10" selection-start="7433" selection-end="7437" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/ParserTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="0" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/ScannerTests.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="49" vertical-scroll-proportion="0.0" />
@@ -683,31 +751,72 @@
         <state line="29" column="88" selection-start="1091" selection-end="1091" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Parser.java">
+    <entry file="file://$PROJECT_DIR$/src/Scanner.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="5" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0">
+        <state line="2" column="18" selection-start="65" selection-end="93" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/ParserTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="56" column="0" selection-start="1627" selection-end="1627" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Descriptor.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="18" selection-start="21" selection-end="21" vertical-scroll-proportion="0.0">
+        <state line="0" column="0" selection-start="0" selection-end="74" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Type.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="245" column="102" selection-start="5369" selection-end="5369" vertical-scroll-proportion="0.0">
+        <state line="182" column="42" selection-start="3816" selection-end="3816" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Boss.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="86" selection-start="480" selection-end="480" vertical-scroll-proportion="0.16483517">
+        <state line="47" column="95" selection-start="1769" selection-end="1769" vertical-scroll-proportion="0.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Parser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="5" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="55" selection-start="355" selection-end="355" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#0#2340#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#2145#2152#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/SymbolTableTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="139" column="80" selection-start="4545" selection-end="4545" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#0#5143#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Scope.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="0" selection-start="349" selection-end="349" vertical-scroll-proportion="0.2927928">
+          <folding>
+            <element signature="e#0#477#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
