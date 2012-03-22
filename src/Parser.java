@@ -1,6 +1,3 @@
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-
 /*
 SNARL/Parser
 
@@ -29,12 +26,10 @@ public class Parser extends Common{
             boldIntToken,
             boldStringToken,
             openBracketToken);
-    protected Source source;                        //Source for calling error in main
 
     //Constructor. Returns a new Parser positioned at the first unignored token.
     
     public Parser(Source source){
-        this.source = source;
         scanner = new Scanner(source);
     }
     
@@ -471,25 +466,6 @@ public class Parser extends Common{
             }
             error.append(tokenToString(tokens[tokens.length - 1]));
             throw new SnarlCompilerException("Expected " + error.toString() + ".");
-        }
-    }
-
-    //Main.
-    
-    public static void main(String[] args){
-        Parser parser;
-        Source source;
-        try {
-            source = new Source(new FileReader(args[0]));
-        } catch (FileNotFoundException ignore) {
-            throw new RuntimeException("Cannot open" + args[0] + ".");
-        }
-        parser = new Parser(source);
-        
-        try{
-            parser.nextProgram();
-        } catch (SnarlCompilerException e){
-            parser.source.error(e.message);
         }
     }
 }
