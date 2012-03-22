@@ -89,12 +89,17 @@ public class Parser extends Common{
     
     protected void nextDeclaration(){
         enter("declaration");
-        nextExpected(boldIntToken, boldStringToken, openBracketToken);
-
-        if(scanner.getToken() != nameToken){
-            nextExpected(intConstantToken);
-            nextExpected(closeBracketToken);
-            nextExpected(boldIntToken);
+        switch (scanner.getToken()){
+            case openBracketToken: {
+                scanner.nextToken();
+                nextExpected(intConstantToken);
+                nextExpected(closeBracketToken);
+                nextExpected(boldIntToken);
+                break;
+            }
+            case boldIntToken:
+            case boldStringToken: {scanner.nextToken();break;}
+            default: {nextExpected(boldIntToken, boldStringToken, openBracketToken);break;}
         }
 
         nextExpected(nameToken);
@@ -161,10 +166,10 @@ public class Parser extends Common{
     }
 
     //NextStatement. Parses the next statement.
-    
+
     protected void nextStatement(){
         enter("statement");
-        
+
         switch(scanner.getToken()){
             case nameToken: {nextAssignmentOrCallStatement();break;}
             case boldBeginToken: {nextBeginStatement();break;}
@@ -172,9 +177,15 @@ public class Parser extends Common{
             case boldIfToken: {nextIfStatement();break;}
             case boldValueToken : {nextValueStatement();break;}
             case boldWhileToken: {nextWhileStatement();break;}
-            default: nextExpected(nameToken,boldBeginToken,boldCodeToken,boldIfToken,boldValueToken,boldWhileToken);
+            default: nextExpected(
+                            nameToken,
+                            boldBeginToken,
+                            boldCodeToken,
+                            boldIfToken,
+                            boldValueToken,
+                            boldWhileToken);
         }
-        
+
         exit("statement");
     }
 

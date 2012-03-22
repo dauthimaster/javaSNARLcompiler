@@ -975,6 +975,18 @@ public class ParserTests extends TestCase{
         }
     }
     
+    public void testDeclarationFailMoenEdgeCase(){
+        Source source = new Source(new StringReader("int 37] int foo"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.nextDeclaration();
+            fail("int 37] int foo is not a legal declaration");
+        } catch (SnarlCompilerException e){
+            assertTrue(true);
+        }
+    }
+    
     public void testProgramPartDeclaration(){
         Source source = new Source(new StringReader("int meow"));
         Parser parser = new Parser(source);
