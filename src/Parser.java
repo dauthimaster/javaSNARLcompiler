@@ -404,7 +404,6 @@ public class Parser extends Common{
                         nextExpected(closeBracketToken);
                         break;
                     }
-                    default: break;
                 }
                 break;
             }
