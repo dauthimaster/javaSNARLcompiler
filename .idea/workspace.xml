@@ -83,7 +83,7 @@
       <file leaf-file-name="Parser.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Parser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="5" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0">
+            <state line="31" column="2" selection-start="1035" selection-end="1122" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -119,11 +119,11 @@
       <file leaf-file-name="SymbolTable.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="0" selection-start="272" selection-end="272" vertical-scroll-proportion="0.3153153">
+            <state line="12" column="0" selection-start="165" selection-end="165" vertical-scroll-proportion="0.27027026">
               <folding>
-                <element signature="e#0#2394#0" expanded="true" />
+                <element signature="e#0#3177#0" expanded="true" />
                 <element signature="imports" expanded="true" />
-                <element signature="e#2199#2206#0" expanded="true" />
+                <element signature="e#2982#2989#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -187,9 +187,9 @@
         <option value="$PROJECT_DIR$/src/StackNode.java" />
         <option value="$PROJECT_DIR$/src/LinkedStack.java" />
         <option value="$PROJECT_DIR$/src/Scope.java" />
-        <option value="$PROJECT_DIR$/src/Parser.java" />
         <option value="$PROJECT_DIR$/test/SymbolTableTests.java" />
         <option value="$PROJECT_DIR$/src/Scanner.java" />
+        <option value="$PROJECT_DIR$/src/Parser.java" />
         <option value="$PROJECT_DIR$/src/SymbolTable.java" />
       </list>
     </option>
@@ -766,25 +766,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Parser.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="5" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/SymbolTableTests.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="139" column="80" selection-start="4545" selection-end="4545" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#0#5143#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Scope.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="40" selection-start="477" selection-end="477" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#0#477#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -812,13 +798,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Parser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="31" column="2" selection-start="1035" selection-end="1122" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Scope.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="40" selection-start="477" selection-end="477" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#0#477#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="0" selection-start="272" selection-end="272" vertical-scroll-proportion="0.3153153">
+        <state line="12" column="0" selection-start="165" selection-end="165" vertical-scroll-proportion="0.27027026">
           <folding>
-            <element signature="e#0#2394#0" expanded="true" />
+            <element signature="e#0#3177#0" expanded="true" />
             <element signature="imports" expanded="true" />
-            <element signature="e#2199#2206#0" expanded="true" />
+            <element signature="e#2982#2989#0" expanded="true" />
           </folding>
         </state>
       </provider>

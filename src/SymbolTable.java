@@ -10,25 +10,32 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
-                        //TODO: comment EVERYTHING!!!
 //Implements a symbol table using a table of stacks.
 
 public class SymbolTable {
-    protected Hashtable<String, LinkedList<Scope>> table;
-    protected int level;
+    protected Hashtable<String, LinkedList<Scope>> table;   //The symbol table
+    protected int level;                                    //The current scope level
+
+    //Constructor. Returns a new SymbolTable that has no scopes.
 
     public SymbolTable(){
         table = new Hashtable<String, LinkedList<Scope>>();
         level = 0;
     }
 
+    //isEmpty. Test if the SymbolTable has no scopes.
+
     public boolean isEmpty(){
         return level == 0;
     }
+
+    //push. Push a new empty scope to the top of the SymbolTable.
     
     public void push(){
         level++;
     }
+
+    //pop. Pop a scope off the top of the SymbolTable. If SymbolTable is empty, throw a RunTimeException.
     
     public void pop(){
         if(isEmpty()){
@@ -52,10 +59,17 @@ public class SymbolTable {
 
         level--;
     }
+
+    //isDeclared. Test if name appears in some scope.
     
     public boolean isDeclared(String name){
         return table.containsKey(name);
     }
+
+    /*
+        getDescriptor. Return the first Descriptor associated with name, if name is not in any scope, throw a
+        SnarlCompilerException. If SymbolTable is empty, throw a RunTimeException.
+     */
 
     public Descriptor getDescriptor(String name){
         if(isEmpty()){
@@ -68,6 +82,11 @@ public class SymbolTable {
         
         return table.get(name).peek().descriptor;
     }
+
+    /*
+        setDescriptor. If name is not in the topmost scope add it to the scope, if it is throw a
+        SnarlCompilerException. If SymbolTable is empty, throw a RunTimeException.
+     */
     
     public void setDescriptor(String name, Descriptor descriptor){
         if(isEmpty()){
