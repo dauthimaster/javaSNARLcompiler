@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7476434a-e30c-4a80-8bf7-cd4b31259e5f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/SymbolTable.java" afterPath="$PROJECT_DIR$/src/SymbolTable.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Descriptor.java" afterPath="$PROJECT_DIR$/src/Descriptor.java" />
     </list>
     <ignored path="javaSNARLcompiler.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -92,7 +92,7 @@
       <file leaf-file-name="Type.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Type.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="182" column="42" selection-start="3816" selection-end="3816" vertical-scroll-proportion="0.0">
+            <state line="83" column="42" selection-start="1892" selection-end="1892" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -107,19 +107,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Descriptor.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Descriptor.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Descriptor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="74" vertical-scroll-proportion="0.0">
+            <state line="8" column="52" selection-start="153" selection-end="153" vertical-scroll-proportion="0.18018018">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SymbolTable.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="SymbolTable.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="0" selection-start="165" selection-end="165" vertical-scroll-proportion="0.27027026">
+            <state line="27" column="86" selection-start="674" selection-end="674" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#0#3177#0" expanded="true" />
                 <element signature="imports" expanded="true" />
@@ -181,7 +181,6 @@
         <option value="$PROJECT_DIR$/src/Source.java" />
         <option value="$PROJECT_DIR$/test/ParserTests.java" />
         <option value="$PROJECT_DIR$/src/Common.java" />
-        <option value="$PROJECT_DIR$/src/Descriptor.java" />
         <option value="$PROJECT_DIR$/src/Boss.java" />
         <option value="$PROJECT_DIR$/src/ListNode.java" />
         <option value="$PROJECT_DIR$/src/StackNode.java" />
@@ -191,6 +190,7 @@
         <option value="$PROJECT_DIR$/src/Scanner.java" />
         <option value="$PROJECT_DIR$/src/Parser.java" />
         <option value="$PROJECT_DIR$/src/SymbolTable.java" />
+        <option value="$PROJECT_DIR$/src/Descriptor.java" />
       </list>
     </option>
   </component>
@@ -745,20 +745,6 @@
         <state line="29" column="88" selection-start="1091" selection-end="1091" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Descriptor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="74" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Type.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="182" column="42" selection-start="3816" selection-end="3816" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Boss.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="47" column="95" selection-start="1769" selection-end="1769" vertical-scroll-proportion="0.0">
@@ -816,12 +802,26 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/SymbolTable.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="0" selection-start="165" selection-end="165" vertical-scroll-proportion="0.27027026">
+        <state line="27" column="86" selection-start="674" selection-end="674" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#0#3177#0" expanded="true" />
             <element signature="imports" expanded="true" />
             <element signature="e#2982#2989#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Type.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="42" selection-start="1892" selection-end="1892" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Descriptor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="52" selection-start="153" selection-end="153" vertical-scroll-proportion="0.18018018">
+          <folding />
         </state>
       </provider>
     </entry>
