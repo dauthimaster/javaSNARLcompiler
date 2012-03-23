@@ -8,8 +8,8 @@ James Current
 import junit.framework.TestCase;
 
 public class SymbolTableTests extends TestCase{
-    SymbolTable symbolTable;
-    BasicType basic;
+    private SymbolTable symbolTable;
+    private BasicType basic;
     
     public SymbolTableTests(String name){
         super(name);
