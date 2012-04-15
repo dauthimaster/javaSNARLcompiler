@@ -26,11 +26,18 @@ public class Parser extends Common{
             boldIntToken,
             boldStringToken,
             openBracketToken);
+    protected SymbolTable table;
+    protected BasicType intType;
+    protected BasicType stringType;
 
     //Constructor. Returns a new Parser positioned at the first unignored token.
     
     public Parser(Source source){
         scanner = new Scanner(source);
+        table = new SymbolTable();
+        table.push();
+        intType = new BasicType("int",Type.wordSize,null);
+        stringType = new BasicType("string",Type.wordSize,null);
     }
     
    /* protected void errorRecoveryExample(){
@@ -43,6 +50,12 @@ public class Parser extends Common{
     }
      */
     //MakeSet. Returns a set of the elements.
+    
+    protected void typeCheck(Descriptor descriptor, Type type){
+        if(!descriptor.getType().isSubtype(type)){
+            throw new SnarlCompilerException("Expression of type " + type + " expected.");
+        }
+    }
 
     protected long makeSet(int... elements){
         long set = 0L;
@@ -87,18 +100,28 @@ public class Parser extends Common{
 
     //NextDeclaration. Parses the next declaration.
     
-    protected void nextDeclaration(){
+    protected void nextDeclaration(){          //now valid for global declarations
         enter("declaration");
         switch (scanner.getToken()){
             case openBracketToken: {
+                ArrayType type;
                 scanner.nextToken();
+                type = new ArrayType(scanner.getInt(), intType);
                 nextExpected(intConstantToken);
                 nextExpected(closeBracketToken);
                 nextExpected(boldIntToken);
+                table.setDescriptor(scanner.getString(), new Descriptor(type));
                 break;
             }
-            case boldIntToken:
-            case boldStringToken: {scanner.nextToken();break;}
+            case boldIntToken: {
+                scanner.nextToken();
+                table.setDescriptor(scanner.getString(),new Descriptor(intType));
+                break;
+            }
+            case boldStringToken: {
+                scanner.nextToken();
+                table.setDescriptor(scanner.getString(),new Descriptor(stringType));
+                break;}
             default: {nextExpected(boldIntToken, boldStringToken, openBracketToken);break;}
         }
 
@@ -347,17 +370,24 @@ public class Parser extends Common{
 
     //NextSum. Parses the next sum.
 
-    protected void nextSum(){
+    protected Descriptor nextSum(){
         enter("sum");
         
-        nextProduct();
-        
-        while(isInSet(scanner.getToken(),sumOperators)){
-            scanner.nextToken();
-            nextProduct();
+        Descriptor left = nextProduct();
+        Descriptor right;
+
+        if (isInSet(scanner.getToken(),sumOperators)) {
+            typeCheck(left, intType);
+            while(isInSet(scanner.getToken(),sumOperators)){
+                scanner.nextToken();
+                right = nextProduct();
+                typeCheck(right, intType);
+            }
         }
-        
+
         exit("sum");
+
+        return (left);
     }
 
     //NextProduct. Parses the next product.
@@ -391,10 +421,12 @@ public class Parser extends Common{
 
     //NextUnit. Parses the next unit.
     
-    protected void nextUnit(){
+    protected Descriptor nextUnit(){
         enter("unit");
+        Descriptor descriptor;
         switch (scanner.getToken()){
             case nameToken: {
+                String name = scanner.getString();
                 scanner.nextToken();
                 switch(scanner.getToken()){
                     case openParenToken: {nextArguments();break;}
@@ -402,6 +434,10 @@ public class Parser extends Common{
                         scanner.nextToken();
                         nextExpression();
                         nextExpected(closeBracketToken);
+                        break;
+                    }
+                    default: {
+                        descriptor = table.getDescriptor(name);
                         break;
                     }
                 }
@@ -413,8 +449,16 @@ public class Parser extends Common{
                 nextExpected(closeParenToken);
                 break;
             }
-            case stringConstantToken:
-            case intConstantToken: {scanner.nextToken();break;}
+            case stringConstantToken: {
+                descriptor = new Descriptor(stringType);
+                scanner.nextToken();
+                break;
+            }
+            case intConstantToken: {
+                descriptor = new Descriptor(intType);
+                scanner.nextToken();
+                break;
+            }
             default: {nextExpected(
                     nameToken,
                     openParenToken,
@@ -424,6 +468,8 @@ public class Parser extends Common{
         }
 
         exit("unit");
+        
+        return descriptor;
     }
 
     //NextArguments. Parses the next arguments.
