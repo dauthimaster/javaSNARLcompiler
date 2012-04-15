@@ -26,4 +26,13 @@ public class ScannerTests extends TestCase{
         assertTrue(scanner.isLetter('q'));
         assertFalse(scanner.isLetter('8'));
     }
+    
+    public void testIsDigit(){
+        Source source = new Source(new StringReader(""));
+        Scanner scanner = new Scanner(source);
+
+        for() {
+            assertTrue(scanner.isDigit());
+        }
+    }
 }
