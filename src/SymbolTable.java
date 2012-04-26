@@ -40,15 +40,13 @@ public class SymbolTable {
     public void pop(){
         if(isEmpty()){
             throw new RuntimeException("Unable to pop, table is empty.");
-        }
-
-        if(!table.isEmpty()){
+        } else {
             for(Enumeration<String> names = table.keys();names.hasMoreElements();){
                 String name = names.nextElement();
                 LinkedList<Scope> list = table.get(name);
                 
                 if(list.peek().level == level){
-                    Scope ignore = list.pop();
+                    list.pop();
                     
                     if(list.isEmpty()){
                         table.remove(name);
@@ -92,17 +90,16 @@ public class SymbolTable {
         if(isEmpty()){
             throw new RuntimeException("Unable to set Descriptor " + name + ", table is empty.");
         }
-        
-        if(isDeclared(name) && table.get(name).peek().level == level){
-            throw new SnarlCompilerException(name + "is declared twice.");
-        }
-        
-        if(!isDeclared(name)){
+
+        if(isDeclared(name)) {
+            if (table.get(name).peek().level == level){
+                throw new SnarlCompilerException(name + "is declared twice.");
+            }
+            table.get(name).push(new Scope(level,descriptor));
+        } else {
             LinkedList<Scope> list = new LinkedList<Scope>();
             list.push(new Scope(level,descriptor));
             table.put(name,list);
-        } else {
-            table.get(name).push(new Scope(level,descriptor));
         }
     }
 }
