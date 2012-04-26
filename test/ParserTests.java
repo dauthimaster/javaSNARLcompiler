@@ -84,6 +84,8 @@ public class ParserTests extends TestCase{
         Source source = new Source(new StringReader("manBearPig"));
         Parser parser = new Parser(source);
 
+        parser.table.setDescriptor("manBearPig",new Descriptor(parser.intType));
+        
         try{
             parser.nextUnit();
         } catch (SnarlCompilerException e){
@@ -1053,5 +1055,18 @@ public class ParserTests extends TestCase{
         } catch (SnarlCompilerException e){
             assertTrue(true);
         }
+    }
+    
+    public void testPassOneReset(){
+        Source source = new Source(new StringReader("meow := 42"));
+        Parser parser = new Parser(source);
+        
+        try{
+            parser.passOne();
+        } catch (SnarlCompilerException e){
+            fail(e.message);
+        }
+        
+        assertEquals(parser.scanner.getToken(), Common.nameToken);
     }
 }

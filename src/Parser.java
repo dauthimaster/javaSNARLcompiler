@@ -6,6 +6,7 @@ James Current
  */
 public class Parser extends Common{
     protected Scanner scanner;                      //Parser pulls tokens from Scanner
+    protected Source source;                        //Used to make 2nd pass of input stream
     protected long comparisonOperators = makeSet(   //Set of comparison operators
             equalToken,
             greaterToken,
@@ -29,11 +30,13 @@ public class Parser extends Common{
     protected SymbolTable table;
     protected BasicType intType;
     protected BasicType stringType;
+    protected Type procValType;
 
     //Constructor. Returns a new Parser positioned at the first unignored token.
     
     public Parser(Source source){
         scanner = new Scanner(source);
+        this.source = source;
         table = new SymbolTable();
         table.push();
         intType = new BasicType("int",Type.wordSize,null);
@@ -49,13 +52,92 @@ public class Parser extends Common{
         }
     }
      */
-    //MakeSet. Returns a set of the elements.
+
+    //PassOne. Runs pass one of the parser, parsing procedure names and signatures only.
+
+    public void passOne(){
+        enter("pass one");
+        while(scanner.getToken() != endFileToken){
+            if(scanner.getToken() == boldProcToken){
+                scanner.nextToken();
+                ProcedureType procedure = new ProcedureType();
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                nextExpected(openParenToken);
+                while(scanner.getToken() != closeParenToken){
+                    switch (scanner.getToken()){
+                        case openBracketToken: {
+                            scanner.nextToken();
+                            ArrayType array = new ArrayType(scanner.getInt(), intType);
+                            nextExpected(intConstantToken);
+                            nextExpected(closeBracketToken);
+                            nextExpected(boldIntToken);
+                            procedure.addParameter(array);
+                            break;
+                        }
+                        case boldIntToken: {
+                            scanner.nextToken();
+                            procedure.addParameter(intType);
+                            break;
+                        }
+                        case boldStringToken: {
+                            scanner.nextToken();
+                            procedure.addParameter(stringType);
+                            break;
+                        }
+                        default: {
+                            nextExpected(
+                                    openBracketToken,
+                                    boldIntToken,
+                                    boldStringToken
+                            );
+                        }
+                    }
+                    nextExpected(nameToken);
+                }
+                switch (scanner.getToken()){
+                    case boldIntToken: {
+                        procedure.addValue(intType);
+                        break;
+                    }
+                    case boldStringToken: {
+                        procedure.addValue(stringType);
+                        break;
+                    }
+                    default: {
+                        nextExpected(
+                                boldIntToken,
+                                boldStringToken
+                        );
+                    }
+                }
+                table.setDescriptor(name,new Descriptor(procedure));
+            }
+            scanner.nextToken();
+        }
+        source.reset();
+        scanner.nextToken();
+        exit("pass one");
+        passTwo();
+    }
     
+    //PassTwo. Runs pass two of the parser, parsing the bulk of the input.
+    
+    protected void passTwo(){
+        enter("pass two");
+        nextProgram();
+        exit("pass two");
+    }
+
+    //TypeCheck. Tests if descriptor is of type type.
+
     protected void typeCheck(Descriptor descriptor, Type type){
         if(!descriptor.getType().isSubtype(type)){
             throw new SnarlCompilerException("Expression of type " + type + " expected.");
         }
     }
+
+    //MakeSet. Returns a set of the elements.
 
     protected long makeSet(int... elements){
         long set = 0L;
@@ -70,10 +152,26 @@ public class Parser extends Common{
     protected boolean isInSet(int element, long set){
         return (set & (1L << element)) != 0L;
     }
+    
+    //NextPassOneProgram. Parses the next program in pass one.
+    
+    protected void nextPassOneProgram(){
+        enter("program");
+        if (scanner.getToken() == boldProcToken) {
+            nextPassOneProgramPart();
+        }
+        
+        while (scanner.getToken() != boldProcToken){
+            scanner.nextToken();
+            nextPassOneProgramPart();
+        }
+        nextExpected(endFileToken);
+        exit("program");
+    }
 
-    //NextProgram. Parses the next program.
+    //NextPassTwoProgram. Parses the next program in pass two.
 
-    public void nextProgram(){
+    protected void nextProgram(){
         enter("program");
         nextProgramPart();
         while (scanner.getToken() == semicolonToken){
@@ -84,7 +182,15 @@ public class Parser extends Common{
         exit("program");
     }
 
-    //NextProgramPart. Parses the next program part.
+    //NextPassOneProgramPart. Parses the next program part in pass one.
+
+    protected void nextPassOneProgramPart(){
+        enter("program part");
+        nextProcedureHead();
+        exit("program part");
+    }
+
+    //NextPassTwoProgramPart. Parses the next program part in pass two.
 
     protected void nextProgramPart(){
         enter("program part");
@@ -97,10 +203,21 @@ public class Parser extends Common{
         }
         exit("program part");
     }
+    
+    //NextProcedureHead. Parses the next procedure head.
+    
+    protected void nextProcedureHead(){
+        enter("procedure head");
+        scanner.nextToken();
+        table.setDescriptor(scanner.getString(), new Descriptor(new ProcedureType()));
+        nextExpected(nameToken);
+        
+        exit("procedure head");
+    }
 
     //NextDeclaration. Parses the next declaration.
     
-    protected void nextDeclaration(){          //now valid for global declarations
+    protected void nextDeclaration(){          
         enter("declaration");
         switch (scanner.getToken()){
             case openBracketToken: {
@@ -137,12 +254,29 @@ public class Parser extends Common{
         nextExpected(boldProcToken);
         nextExpected(nameToken);
 
+        table.push();
         nextParameters();
 
-        nextExpected(boldIntToken, boldStringToken);
+        switch (scanner.getToken()){
+            case boldIntToken: {
+                scanner.nextToken();
+                procValType = intType;
+                break;
+            }
+            case boldStringToken: {
+                scanner.nextToken();
+                procValType = stringType;
+                break;
+            }
+            default: {
+                nextExpected(boldIntToken, boldStringToken);
+            }
+        }
         nextExpected(colonToken);
 
         nextBody();
+        
+        table.pop();
 
         exit("procedure");
     }
@@ -217,18 +351,35 @@ public class Parser extends Common{
     protected void nextAssignmentOrCallStatement(){
         enter("assignment or call statement");
         
+        String name = scanner.getString();
         nextExpected(nameToken);
         
         switch(scanner.getToken()){
-            case openParenToken: {nextArguments();break;}
-            case openBracketToken: {
-                scanner.nextToken();
-                nextExpression();
-                nextExpected(closeBracketToken);
+            case openParenToken: {
+                if(!(table.getDescriptor(name).getType() instanceof ProcedureType)){
+                    throw new SnarlCompilerException(name + " is not a procedure.");
+                }
+                nextArguments();
+                break;
             }
-            case colonEqualToken: {
+            case openBracketToken: {
+                if(!(table.getDescriptor(name).getType() instanceof ArrayType)){
+                    throw new SnarlCompilerException(name + " is not an array.");
+                }
                 scanner.nextToken();
-                nextExpression();
+                typeCheck(nextExpression(), intType);
+                nextExpected(closeBracketToken);
+                nextExpected(colonEqualToken);
+                typeCheck(nextExpression(), intType);
+                break;
+            }
+            case colonEqualToken: {                                                 //TODO: set var = to table.getDescriptor(name).getType()
+                if(!(table.getDescriptor(name).getType() == intType || table.getDescriptor(name).getType() == stringType)){
+                    throw new SnarlCompilerException(name + " must be an int or a string.");
+                }
+                scanner.nextToken();
+                Descriptor descriptor = nextExpression();
+                descriptor.getType().isSubtype(table.getDescriptor(name).getType());
                 break;
             }
             default: {
@@ -321,44 +472,61 @@ public class Parser extends Common{
 
     //NextExpression. Parses the next expression.
 
-    protected void nextExpression(){
+    protected Descriptor nextExpression(){
         enter("expression");
         
-        nextConjunction();
-        
-        while (scanner.getToken() == boldOrToken){
-            scanner.nextToken();
-            nextConjunction();
+        Descriptor left = nextConjunction();
+        Descriptor right;
+
+        if (scanner.getToken() == boldOrToken) {
+            typeCheck(left, intType);
+            while (scanner.getToken() == boldOrToken){
+                scanner.nextToken();
+                right = nextConjunction();
+                typeCheck(right, intType);
+            }
         }
-        
+
         exit("expression");
+        
+        return left;
     }
 
     //NextConjunction. Parses the next conjunction.
     
-    protected void nextConjunction(){
+    protected Descriptor nextConjunction(){
         enter("conjunction");
         
-        nextComparison();
-        
-        while (scanner.getToken() == boldAndToken){
-            scanner.nextToken();
-            nextComparison();
+        Descriptor left = nextComparison();
+        Descriptor right;
+
+        if (scanner.getToken() == boldAndToken) {
+            typeCheck(left, intType);
+            while (scanner.getToken() == boldAndToken){
+                scanner.nextToken();
+                right = nextComparison();
+                typeCheck(right, intType);
+            }
         }
-        
+
         exit("conjunction");
+        
+        return left;
     }
 
     //NextComparison. Parses the next comparison.
     
-    protected void nextComparison(){
+    protected Descriptor nextComparison(){
         enter("comparison");
         
-        nextSum();
+        Descriptor left = nextSum();
+        Descriptor right;
         
         if(isInSet(scanner.getToken(), comparisonOperators)){
+            typeCheck(left, intType);
             scanner.nextToken();
-            nextSum();
+            right = nextSum();
+            typeCheck(right, intType);
         }
 
         if(isInSet(scanner.getToken(), comparisonOperators)){
@@ -366,11 +534,13 @@ public class Parser extends Common{
         }
         
         exit("comparison");
+        
+        return left;
     }
 
     //NextSum. Parses the next sum.
 
-    protected Descriptor nextSum(){
+    protected Descriptor nextSum(){           
         enter("sum");
         
         Descriptor left = nextProduct();
@@ -387,43 +557,59 @@ public class Parser extends Common{
 
         exit("sum");
 
-        return (left);
+        return left;
     }
 
     //NextProduct. Parses the next product.
 
-    protected void nextProduct(){
+    protected Descriptor nextProduct(){
         enter("product");
 
-        nextTerm();
+        Descriptor left = nextTerm();
+        Descriptor right;
 
-        while(isInSet(scanner.getToken(),productOperators)){
-            scanner.nextToken();
-            nextTerm();
+        if (isInSet(scanner.getToken(), productOperators)) {
+            typeCheck(left, intType);
+            while(isInSet(scanner.getToken(),productOperators)){
+                scanner.nextToken();
+                right = nextTerm();
+                typeCheck(right, intType);
+            }
         }
 
         exit("product");
+        
+        return left;
     }
 
     //NextTerm. Parses the next term.
 
-    protected void nextTerm(){
+    protected Descriptor nextTerm(){
         enter("term");
 
+        Boolean operator = false;
+        
         while(isInSet(scanner.getToken(),termOperators)){
             scanner.nextToken();
+            operator = true;
         }
 
-        nextUnit();
+        Descriptor descriptor = nextUnit();
 
+        if(operator){
+            typeCheck(descriptor, intType);
+        }
+        
         exit("term");
+        
+        return descriptor;
     }
 
     //NextUnit. Parses the next unit.
     
     protected Descriptor nextUnit(){
         enter("unit");
-        Descriptor descriptor;
+        Descriptor descriptor = null;
         switch (scanner.getToken()){
             case nameToken: {
                 String name = scanner.getString();

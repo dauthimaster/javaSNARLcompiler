@@ -119,8 +119,9 @@ class Source extends Common
         {
             lineCount = 0;
             lineIndex = 0;
-            reader.close();
-            reader = new BufferedReader(in);
+            //reader.close();
+            //reader = new BufferedReader(in);
+            in.reset();
             nextLine();
             nextChar();
         }
