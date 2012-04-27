@@ -352,18 +352,19 @@ public class Parser extends Common{
         enter("assignment or call statement");
         
         String name = scanner.getString();
+        Type type = table.getDescriptor(name).getType();
         nextExpected(nameToken);
         
         switch(scanner.getToken()){
             case openParenToken: {
-                if(!(table.getDescriptor(name).getType() instanceof ProcedureType)){
+                if(!(type instanceof ProcedureType)){
                     throw new SnarlCompilerException(name + " is not a procedure.");
                 }
-                nextArguments();
+                nextArguments((ProcedureType) type);
                 break;
             }
             case openBracketToken: {
-                if(!(table.getDescriptor(name).getType() instanceof ArrayType)){
+                if(!(type instanceof ArrayType)){
                     throw new SnarlCompilerException(name + " is not an array.");
                 }
                 scanner.nextToken();
@@ -373,13 +374,13 @@ public class Parser extends Common{
                 typeCheck(nextExpression(), intType);
                 break;
             }
-            case colonEqualToken: {                                                 //TODO: set var = to table.getDescriptor(name).getType()
-                if(!(table.getDescriptor(name).getType() == intType || table.getDescriptor(name).getType() == stringType)){
+            case colonEqualToken: {                                                
+                if(!(type == intType || type == stringType)){
                     throw new SnarlCompilerException(name + " must be an int or a string.");
                 }
                 scanner.nextToken();
                 Descriptor descriptor = nextExpression();
-                descriptor.getType().isSubtype(table.getDescriptor(name).getType());
+                descriptor.getType().isSubtype(type);
                 break;
             }
             default: {
@@ -432,7 +433,7 @@ public class Parser extends Common{
         enter("if statement");
         
         nextExpected(boldIfToken);
-        nextExpression();
+        typeCheck(nextExpression(), intType);
         
         nextExpected(boldThenToken);
         nextStatement();
@@ -451,7 +452,7 @@ public class Parser extends Common{
         enter("value statement");
         
         nextExpected(boldValueToken);
-        nextExpression();
+        typeCheck(nextExpression(), procValType);
         
         exit("value statement");
     }
@@ -462,7 +463,7 @@ public class Parser extends Common{
         enter("while statement");
         
         nextExpected(boldWhileToken);
-        nextExpression();
+        typeCheck(nextExpression(), intType);
         
         nextExpected(boldDoToken);
         nextStatement();
@@ -613,12 +614,22 @@ public class Parser extends Common{
         switch (scanner.getToken()){
             case nameToken: {
                 String name = scanner.getString();
+                Type type = table.getDescriptor(name).getType();
                 scanner.nextToken();
                 switch(scanner.getToken()){
-                    case openParenToken: {nextArguments();break;}
+                    case openParenToken: {
+                        if(!(type instanceof ProcedureType)){
+                            throw new SnarlCompilerException(name + " is not a procedure.");
+                        }
+                        nextArguments((ProcedureType) type);
+                        break;
+                    }
                     case openBracketToken: {
+                        if(!(type instanceof ArrayType)){
+                            throw new SnarlCompilerException(name + " is not an array.");
+                        }
                         scanner.nextToken();
-                        nextExpression();
+                        typeCheck(nextExpression(), intType);
                         nextExpected(closeBracketToken);
                         break;
                     }
@@ -660,18 +671,28 @@ public class Parser extends Common{
 
     //NextArguments. Parses the next arguments.
 
-    protected void nextArguments(){
+    protected void nextArguments(ProcedureType proc){
         enter("arguments");
         
         nextExpected(openParenToken);
+        ProcedureType.Parameter params = proc.getParameters();
+        int arity = 0;
 
         if(scanner.getToken() != closeParenToken){
-            nextExpression();
+            typeCheck(nextExpression(), params.getType());
+            params = params.getNext();
+            arity++;
 
             while(scanner.getToken() == commaToken){
                 scanner.nextToken();
-                nextExpression();
+                typeCheck(nextExpression(), params.getType());
+                params = params.getNext();
+                arity++;
             }
+        }
+        
+        if(arity != proc.getArity()){
+            throw new SnarlCompilerException("Expected " + proc.getArity() + " arguments.");
         }
 
         nextExpected(closeParenToken);
