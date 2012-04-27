@@ -97,6 +97,8 @@ public class ParserTests extends TestCase{
         Source source = new Source(new StringReader("manBearPig()"));
         Parser parser = new Parser(source);
 
+        parser.table.setDescriptor("manBearPig", new Descriptor(new ProcedureType()));
+
         try{
             parser.nextUnit();
         } catch (SnarlCompilerException e){
@@ -107,6 +109,10 @@ public class ParserTests extends TestCase{
     public void testUnitNameOpenParenArgs(){
         Source source = new Source(new StringReader("manBearPig(1 or 0)"));
         Parser parser = new Parser(source);
+        
+        ProcedureType proc = new ProcedureType();
+        proc.addParameter(parser.intType);
+        parser.table.setDescriptor("manBearPig", new Descriptor(proc));
 
         try{
             parser.nextUnit();
@@ -118,6 +124,8 @@ public class ParserTests extends TestCase{
     public void testUnitNameOpenBracket(){
         Source source = new Source(new StringReader("manBearPig[1 or 0]"));
         Parser parser = new Parser(source);
+        
+        parser.table.setDescriptor("manBearPig", new Descriptor(new ArrayType(1, parser.intType)));
 
         try{
             parser.nextUnit();
@@ -142,8 +150,11 @@ public class ParserTests extends TestCase{
         Source source = new Source(new StringReader("(1 or 0)"));
         Parser parser = new Parser(source);
         
+        ProcedureType proc = new ProcedureType();
+        proc.addParameter(parser.intType);
+        
         try{
-            parser.nextArguments();
+            parser.nextArguments(proc);
         } catch (SnarlCompilerException e){
             fail("1 or 0 is an argument " + e.message);
         }
@@ -152,9 +163,14 @@ public class ParserTests extends TestCase{
     public void testArgumentsMulti(){
         Source source = new Source(new StringReader("(1 or 0, 2, 13)"));
         Parser parser = new Parser(source);
+        
+        ProcedureType proc = new ProcedureType();
+        proc.addParameter(parser.intType);
+        proc.addParameter(parser.intType);
+        proc.addParameter(parser.intType);
 
         try{
-            parser.nextArguments();
+            parser.nextArguments(proc);
         } catch (SnarlCompilerException e){
             fail("1 or 0, 2, 13 are arguments " + e.message);
         }
@@ -164,8 +180,11 @@ public class ParserTests extends TestCase{
         Source source = new Source(new StringReader("(1 or 0 2)"));
         Parser parser = new Parser(source);
 
+        ProcedureType proc = new ProcedureType();
+        proc.addParameter(parser.intType);
+        
         try{
-            parser.nextArguments();
+            parser.nextArguments(proc);
             fail("1 or 0 2 is missing a comma");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -420,6 +439,8 @@ public class ParserTests extends TestCase{
     public void testValueStatement(){
         Source source = new Source(new StringReader("value 21"));
         Parser parser = new Parser(source);
+        
+        parser.procValType = parser.intType;
 
         try{
             parser.nextValueStatement();         
@@ -594,6 +615,8 @@ public class ParserTests extends TestCase{
         Source source = new Source(new StringReader("meow()"));
         Parser parser = new Parser(source);
         
+        parser.table.setDescriptor("meow", new Descriptor(new ProcedureType()));
+        
         try{
             parser.nextAssignmentOrCallStatement();
         } catch (SnarlCompilerException e){
@@ -604,6 +627,10 @@ public class ParserTests extends TestCase{
     public void testAssignmentOrCallStatementParenWithArgs(){
         Source source = new Source(new StringReader("meow(1)"));
         Parser parser = new Parser(source);
+        
+        ProcedureType proc = new ProcedureType();
+        proc.addParameter(parser.intType);
+        parser.table.setDescriptor("meow", new Descriptor(proc));
 
         try{
             parser.nextAssignmentOrCallStatement();
@@ -615,6 +642,8 @@ public class ParserTests extends TestCase{
     public void testAssignmentOrCallStatementBracket(){
         Source source = new Source(new StringReader("meow[1] := 42"));
         Parser parser = new Parser(source);
+        
+        parser.table.setDescriptor("meow", new Descriptor(new ArrayType(1, parser.intType)));
 
         try{
             parser.nextAssignmentOrCallStatement();
@@ -626,6 +655,8 @@ public class ParserTests extends TestCase{
     public void testAssignmentOrCallStatementColonEqual(){
         Source source = new Source(new StringReader("meow := 42"));
         Parser parser = new Parser(source);
+        
+        parser.table.setDescriptor("meow", new Descriptor(parser.intType));
 
         try{
             parser.nextAssignmentOrCallStatement();
@@ -673,6 +704,8 @@ public class ParserTests extends TestCase{
     public void testStatementName(){
         Source source = new Source(new StringReader("meow := 1"));
         Parser parser = new Parser(source);
+        
+        parser.table.setDescriptor("meow", new Descriptor(parser.intType));
 
         try{
             parser.nextStatement();
@@ -717,6 +750,8 @@ public class ParserTests extends TestCase{
     public void testStatementValue(){
         Source source = new Source(new StringReader("value 1"));
         Parser parser = new Parser(source);
+        
+        parser.procValType = parser.intType;
 
         try{
             parser.nextStatement();
@@ -831,6 +866,17 @@ public class ParserTests extends TestCase{
         Source source = new Source(new StringReader("proc rescue() int: begin end"));
         Parser parser = new Parser(source);
         
+        try{
+            parser.nextProcedure();
+        } catch (SnarlCompilerException e){
+            fail("proc rescue() int: begin end is a procedure " + e.message);
+        }
+    }
+
+    public void testProcedureValueStatement(){
+        Source source = new Source(new StringReader("proc rescue() int: begin value 22 end"));
+        Parser parser = new Parser(source);
+
         try{
             parser.nextProcedure();
         } catch (SnarlCompilerException e){
@@ -1057,8 +1103,9 @@ public class ParserTests extends TestCase{
         }
     }
     
-    public void testPassOneReset(){
-        Source source = new Source(new StringReader("meow := 42"));
+    public void testPassOne(){
+        Source source = new Source(new StringReader("proc rescue() int: begin me() end; " +
+                "proc me() int: begin rescue() end"));
         Parser parser = new Parser(source);
         
         try{
@@ -1066,7 +1113,5 @@ public class ParserTests extends TestCase{
         } catch (SnarlCompilerException e){
             fail(e.message);
         }
-        
-        assertEquals(parser.scanner.getToken(), Common.nameToken);
     }
 }

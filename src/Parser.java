@@ -95,6 +95,7 @@ public class Parser extends Common{
                     }
                     nextExpected(nameToken);
                 }
+                nextExpected(closeParenToken);
                 switch (scanner.getToken()){
                     case boldIntToken: {
                         procedure.addValue(intType);

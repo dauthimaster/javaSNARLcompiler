@@ -75,7 +75,7 @@ public class SymbolTable {
         }
         
         if(!isDeclared(name)){
-            throw new SnarlCompilerException(name + "is not declared.");
+            throw new SnarlCompilerException(name + " is not declared.");
         }
         
         return table.get(name).peek().descriptor;
@@ -93,7 +93,7 @@ public class SymbolTable {
 
         if(isDeclared(name)) {
             if (table.get(name).peek().level == level){
-                throw new SnarlCompilerException(name + "is declared twice.");
+                throw new SnarlCompilerException(name + " is declared twice.");
             }
             table.get(name).push(new Scope(level,descriptor));
         } else {

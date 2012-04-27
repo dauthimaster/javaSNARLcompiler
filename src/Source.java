@@ -11,12 +11,12 @@ import java.io.*;
 
 class Source extends Common
 {
-    private char           ch;         //  Last character read from LINE.
-    private String         line;       //  Last line read from READER.
-    private int            lineCount;  //  Number of lines read from READER.
-    private int            lineIndex;  //  Index of current character in LINE.
-    private Reader         in;       //  Pathname of source file.
-    private BufferedReader reader;     //  Read source characters from here.
+    private char            ch;         //  Last character read from LINE.
+    private String          line;       //  Last line read from READER.
+    private int             lineCount;  //  Number of lines read from READER.
+    private int             lineIndex;  //  Index of current character in LINE.
+    private CharArrayReader in;         //  CharArray made from source code.
+    private BufferedReader  reader;     //  Read source characters from here.
 
 //  Constructor. Return a new SOURCE, positioned at its first character.
 
@@ -26,8 +26,17 @@ class Source extends Common
         //{
             lineCount = 0;
             lineIndex = 0;
-            this.in = in;
+            CharArrayWriter charArrayWriter = new CharArrayWriter();
             reader = new BufferedReader(in);
+            nextLine();
+            nextChar();
+            while (ch != eofChar){
+                charArrayWriter.append(ch);
+                nextChar();
+            }
+            charArrayWriter.append(eofChar);
+            this.in = new CharArrayReader(charArrayWriter.toCharArray());
+            reader = new BufferedReader(this.in);
             nextLine();
             nextChar();
        /* }
@@ -119,8 +128,6 @@ class Source extends Common
         {
             lineCount = 0;
             lineIndex = 0;
-            //reader.close();
-            //reader = new BufferedReader(in);
             in.reset();
             nextLine();
             nextChar();
