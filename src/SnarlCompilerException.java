@@ -14,4 +14,8 @@ public class SnarlCompilerException extends RuntimeException{
         this.message = message;
         this.cause = cause;
     }
+    
+    public String getMessage(){
+        return message;
+    }
 }

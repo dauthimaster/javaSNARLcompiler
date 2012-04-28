@@ -153,24 +153,8 @@ public class Parser extends Common{
     protected boolean isInSet(int element, long set){
         return (set & (1L << element)) != 0L;
     }
-    
-    //NextPassOneProgram. Parses the next program in pass one.
-    
-    protected void nextPassOneProgram(){
-        enter("program");
-        if (scanner.getToken() == boldProcToken) {
-            nextPassOneProgramPart();
-        }
-        
-        while (scanner.getToken() != boldProcToken){
-            scanner.nextToken();
-            nextPassOneProgramPart();
-        }
-        nextExpected(endFileToken);
-        exit("program");
-    }
 
-    //NextPassTwoProgram. Parses the next program in pass two.
+    //NextProgram. Parses the next program.
 
     protected void nextProgram(){
         enter("program");
@@ -183,15 +167,7 @@ public class Parser extends Common{
         exit("program");
     }
 
-    //NextPassOneProgramPart. Parses the next program part in pass one.
-
-    protected void nextPassOneProgramPart(){
-        enter("program part");
-        nextProcedureHead();
-        exit("program part");
-    }
-
-    //NextPassTwoProgramPart. Parses the next program part in pass two.
+    //NextProgramPart. Parses the next program part.
 
     protected void nextProgramPart(){
         enter("program part");
@@ -203,17 +179,6 @@ public class Parser extends Common{
             nextExpected(boldProcToken,boldIntToken,boldStringToken,openBracketToken);
         }
         exit("program part");
-    }
-    
-    //NextProcedureHead. Parses the next procedure head.
-    
-    protected void nextProcedureHead(){
-        enter("procedure head");
-        scanner.nextToken();
-        table.setDescriptor(scanner.getString(), new Descriptor(new ProcedureType()));
-        nextExpected(nameToken);
-        
-        exit("procedure head");
     }
 
     //NextDeclaration. Parses the next declaration.
@@ -611,7 +576,7 @@ public class Parser extends Common{
     
     protected Descriptor nextUnit(){
         enter("unit");
-        Descriptor descriptor = null;
+        Descriptor descriptor = new Descriptor(new BasicType("null", Type.wordSize, null));
         switch (scanner.getToken()){
             case nameToken: {
                 String name = scanner.getString();
@@ -623,6 +588,7 @@ public class Parser extends Common{
                             throw new SnarlCompilerException(name + " is not a procedure.");
                         }
                         nextArguments((ProcedureType) type);
+                        descriptor = new Descriptor(((ProcedureType) type).getValue());
                         break;
                     }
                     case openBracketToken: {
@@ -632,6 +598,7 @@ public class Parser extends Common{
                         scanner.nextToken();
                         typeCheck(nextExpression(), intType);
                         nextExpected(closeBracketToken);
+                        descriptor = new Descriptor(((ArrayType) type).getBase());
                         break;
                     }
                     default: {
@@ -643,7 +610,7 @@ public class Parser extends Common{
             }
             case openParenToken: {
                 scanner.nextToken();
-                nextExpression();
+                descriptor = nextExpression();
                 nextExpected(closeParenToken);
                 break;
             }
@@ -657,11 +624,13 @@ public class Parser extends Common{
                 scanner.nextToken();
                 break;
             }
-            default: {nextExpected(
+            default: {
+                nextExpected(
                     nameToken,
                     openParenToken,
                     stringConstantToken,
-                    intConstantToken);
+                    intConstantToken
+                );
             }
         }
 

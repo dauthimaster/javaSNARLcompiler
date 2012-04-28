@@ -28,12 +28,26 @@ class Source extends Common
             lineIndex = 0;
             CharArrayWriter charArrayWriter = new CharArrayWriter();
             reader = new BufferedReader(in);
-            nextLine();
-            nextChar();
-            while (ch != eofChar){
-                charArrayWriter.append(ch);
-                nextChar();
-            }
+            do{
+                lineIndex = 0;
+                try
+                {
+                    line = reader.readLine();
+                    if (line == null)
+                    {
+                        line = "" + eofChar;
+                    }
+                    else
+                    {
+                        line += "\n";
+                    }
+                }
+                catch (IOException ignore)
+                {
+                    throw new RuntimeException("Cannot read " + in + ".");
+                }
+                charArrayWriter.append(line);
+            }while(!(line.equals("" + eofChar)));
             charArrayWriter.append(eofChar);
             this.in = new CharArrayReader(charArrayWriter.toCharArray());
             reader = new BufferedReader(this.in);
