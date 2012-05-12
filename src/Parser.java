@@ -31,6 +31,9 @@ public class Parser extends Common{
     protected BasicType intType;
     protected BasicType stringType;
     protected Type procValType;
+    protected Allocator allocator;
+    protected Assembler assembler;
+    protected Global global;
 
     //Constructor. Returns a new Parser positioned at the first unignored token.
     
@@ -40,7 +43,10 @@ public class Parser extends Common{
         table = new SymbolTable();
         table.push();
         intType = new BasicType("int",Type.wordSize,null);
-        stringType = new BasicType("string",Type.wordSize,null);
+        stringType = new BasicType("string",Type.addressSize,null);
+        allocator = new Allocator();
+        assembler = new Assembler();
+        global = new Global(assembler);
     }
     
    /* protected void errorRecoveryExample(){
@@ -179,6 +185,34 @@ public class Parser extends Common{
             nextExpected(boldProcToken,boldIntToken,boldStringToken,openBracketToken);
         }
         exit("program part");
+    }
+    
+    //NextGlobalDeclaration. Parses the next global declaration.
+    
+    protected void nextGlobalDeclaration(){
+        switch (scanner.getToken()){
+            case boldIntToken: {
+                scanner.nextToken();
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                Label label = global.enterVariable(intType);
+                table.setDescriptor(name, new GlobalVariableDescriptor(intType, label));
+                break;
+            }
+            case boldStringToken: {
+                //TODO make string type like above
+            }
+            case openBracketToken: {
+                //TODO make array type, similar to above except with GlobalArrayDescriptor
+            }
+            default: {
+                nextExpected(
+                        boldIntToken,
+                        boldStringToken,
+                        openBracketToken
+                );
+            }
+        }
     }
 
     //NextDeclaration. Parses the next declaration.
@@ -342,11 +376,11 @@ public class Parser extends Common{
             }
             case colonEqualToken: {                                                
                 if(!(type == intType || type == stringType)){
-                    throw new SnarlCompilerException(name + " must be an int or a string.");
+                    throw new SnarlCompilerException(name + " must of type int or type string.");
                 }
                 scanner.nextToken();
                 Descriptor descriptor = nextExpression();
-                descriptor.getType().isSubtype(type);
+                typeCheck(descriptor, type);
                 break;
             }
             default: {
@@ -574,21 +608,24 @@ public class Parser extends Common{
 
     //NextUnit. Parses the next unit.
     
-    protected Descriptor nextUnit(){
+    protected RegisterDescriptor nextUnit(){       //TODO: convert to RegisterDescriptors
         enter("unit");
-        Descriptor descriptor = new Descriptor(new BasicType("null", Type.wordSize, null));
+        RegisterDescriptor registerDescriptor;
         switch (scanner.getToken()){
             case nameToken: {
                 String name = scanner.getString();
                 Type type = table.getDescriptor(name).getType();
                 scanner.nextToken();
+                NameDescriptor descriptor = table.getDescriptor(name);
+                Allocator.Register register = descriptor.rvalue();
+                registerDescriptor = new RegisterDescriptor(type, register); //TODO clean this up, probly split it out to other places
                 switch(scanner.getToken()){
                     case openParenToken: {
                         if(!(type instanceof ProcedureType)){
                             throw new SnarlCompilerException(name + " is not a procedure.");
                         }
                         nextArguments((ProcedureType) type);
-                        descriptor = new Descriptor(((ProcedureType) type).getValue());
+                        registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue()); //TODO get register
                         break;
                     }
                     case openBracketToken: {
@@ -598,11 +635,11 @@ public class Parser extends Common{
                         scanner.nextToken();
                         typeCheck(nextExpression(), intType);
                         nextExpected(closeBracketToken);
-                        descriptor = new Descriptor(((ArrayType) type).getBase());
+                        registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase());  //TODO get register
                         break;
                     }
                     default: {
-                        descriptor = table.getDescriptor(name);
+                        registerDescriptor = table.getDescriptor(name);
                         break;
                     }
                 }
@@ -610,17 +647,22 @@ public class Parser extends Common{
             }
             case openParenToken: {
                 scanner.nextToken();
-                descriptor = nextExpression();
+                registerDescriptor = nextExpression();
                 nextExpected(closeParenToken);
                 break;
             }
             case stringConstantToken: {
-                descriptor = new Descriptor(stringType);
+                Allocator.Register register = allocator.request();
+                Label label = global.enterString(scanner.getString());
+                assembler.emit("la", register, label);
+                registerDescriptor = new RegisterDescriptor(stringType, register);
                 scanner.nextToken();
                 break;
             }
             case intConstantToken: {
-                descriptor = new Descriptor(intType);
+                Allocator.Register register = allocator.request();
+                assembler.emit("li", register, scanner.getInt());
+                registerDescriptor = new RegisterDescriptor(intType, register);
                 scanner.nextToken();
                 break;
             }
@@ -631,12 +673,13 @@ public class Parser extends Common{
                     stringConstantToken,
                     intConstantToken
                 );
+                registerDescriptor = null;
             }
         }
 
         exit("unit");
         
-        return descriptor;
+        return registerDescriptor;
     }
 
     //NextArguments. Parses the next arguments.
@@ -646,29 +689,48 @@ public class Parser extends Common{
         
         nextExpected(openParenToken);
         ProcedureType.Parameter params = proc.getParameters();
-        int arity = 0;
+        //int arity = 0;
 
         if(scanner.getToken() != closeParenToken){
             typeCheck(nextExpression(), params.getType());
             params = params.getNext();
-            arity++;
+            if(params == null){
+                throw new SnarlCompilerException("Proc has too few args"); //TODO: cleanup
+            }
+            //arity++;
 
             while(scanner.getToken() == commaToken){
                 scanner.nextToken();
                 typeCheck(nextExpression(), params.getType());
                 params = params.getNext();
-                arity++;
+                if(params == null){
+                    throw new SnarlCompilerException("Proc has too few args"); //TODO: cleanup
+                }
+                //arity++;
             }
         }
         
-        if(arity != proc.getArity()){
+        if(params != null){
             throw new SnarlCompilerException("Expected " + proc.getArity() + " arguments.");
         }
+        
+       /* if(arity != proc.getArity()){
+            throw new SnarlCompilerException("Expected " + proc.getArity() + " arguments.");
+        }*/
 
         nextExpected(closeParenToken);
 
         exit("arguments");
     }
+         /*
+    protected ProcedureType.Parameter advanceToNextParameter(Descriptor descriptor, ProcedureType.Parameter parameters){
+        if(parameters == null){
+            throw new SnarlCompilerException("Too many args"); //TODO: clean this up
+        } else if(!descriptor.getType().isSubtype(parameters.getType())){
+            throw new SnarlCompilerException("Arg has unexpected type");
+        }
+        return parameters.getNext();
+    }      */
 
     //NextExpected(int token). Checks to see if the current token is the token passed, if not throws an exception.
 
@@ -700,5 +762,14 @@ public class Parser extends Common{
             error.append(tokenToString(tokens[tokens.length - 1]));
             throw new SnarlCompilerException("Expected " + error.toString() + ".");
         }
+    }
+    
+    //Stub for rvalue method in GlobalVariableDescriptor
+    
+    protected Allocator.Register rvalue(){
+        Allocator.Register register = allocator.request();
+        assembler.emit("la", register, label);
+        assembler.emit("lw", register, 0, register);
+        return register;
     }
 }
