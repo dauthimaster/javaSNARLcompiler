@@ -1,3 +1,9 @@
+/*
+SNARL/Allocator
+
+James Current
+4/28/12
+ */
 public class Allocator {
     public final class Register {
         private String name;    //Printable name of this Register
