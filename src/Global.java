@@ -1,3 +1,9 @@
+/*
+  SNARL/Global
+
+  James Current
+  Date: 5/12/12
+ */
 
 import java.util.ArrayList;
 import java.util.Enumeration;
