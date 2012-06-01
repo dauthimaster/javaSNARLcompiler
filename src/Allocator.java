@@ -36,7 +36,7 @@ public class Allocator {
     }
     
     public final Register fp = new Register("$fp", null, true);     //$fp register
-    public final Register fa = new Register("$fa", null, true);     //$fa register
+    public final Register ra = new Register("$ra", null, true);     //$ra register
     public final Register sp = new Register("$sp", null, true);     //$sp register
     public final Register v0 = new Register("$v0", null, true);     //$v0 register
     public final Register zero = new Register("$zero", null, true); //$zero register

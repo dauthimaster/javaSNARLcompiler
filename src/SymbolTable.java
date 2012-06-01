@@ -65,13 +65,13 @@ public class SymbolTable {
     }
 
     /*
-        getDescriptor. Return the first Descriptor associated with name, if name is not in any scope, throw a
+        getDescriptor. Return the first NameDescriptor associated with name, if name is not in any scope, throw a
         SnarlCompilerException. If SymbolTable is empty, throw a RunTimeException.
      */
 
-    public Descriptor getDescriptor(String name){
+    public NameDescriptor getDescriptor(String name){
         if(isEmpty()){
-            throw new RuntimeException("Unable to get Descriptor " + name + ", table is empty.");
+            throw new RuntimeException("Unable to get NameDescriptor " + name + ", table is empty.");
         }
         
         if(!isDeclared(name)){
@@ -86,19 +86,19 @@ public class SymbolTable {
         SnarlCompilerException. If SymbolTable is empty, throw a RunTimeException.
      */
     
-    public void setDescriptor(String name, Descriptor descriptor){
+    public void setDescriptor(String name, NameDescriptor nameDescriptor){
         if(isEmpty()){
-            throw new RuntimeException("Unable to set Descriptor " + name + ", table is empty.");
+            throw new RuntimeException("Unable to set NameDescriptor " + name + ", table is empty.");
         }
 
         if(isDeclared(name)) {
             if (table.get(name).peek().level == level){
                 throw new SnarlCompilerException(name + " is declared twice.");
             }
-            table.get(name).push(new Scope(level,descriptor));
+            table.get(name).push(new Scope(level,nameDescriptor));
         } else {
             LinkedList<Scope> list = new LinkedList<Scope>();
-            list.push(new Scope(level,descriptor));
+            list.push(new Scope(level,nameDescriptor));
             table.put(name,list);
         }
     }

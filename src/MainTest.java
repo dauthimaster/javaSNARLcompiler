@@ -5,17 +5,17 @@ public class MainTest {
     public MainTest(){}
     public static void main(String[] args){
         String file = args[0];
-        Parser parser = null;
+        Compiler compiler = null;
         Source source = null;
         try {
             source = new Source(new FileReader(file));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        parser = new Parser(source);
+        compiler = new Compiler(source);
 
         try {
-            parser.passOne();
+            compiler.passOne();
         } catch (Exception e) {
             e.printStackTrace();
             source.error(e.getMessage());

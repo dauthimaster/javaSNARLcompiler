@@ -8,11 +8,11 @@
 
 public class Scope {
     protected int level; //Level at which the scope exists
-    protected Descriptor descriptor; //Descriptor of the name this scope is keyed to
+    protected NameDescriptor descriptor; //NameDescriptor of the name this scope is keyed to
 
     //Constructor. Return a new Scope positioned at the specified level and containing the specified descriptor
 
-    public Scope(int level, Descriptor descriptor) {
+    public Scope(int level, NameDescriptor descriptor) {
         this.descriptor = descriptor;
         this.level = level;
     }

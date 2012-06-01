@@ -1,11 +1,11 @@
 /*
-SNARL/Parser
+SNARL/Compiler
 
 James Current
 1/30/12
  */
-public class Parser extends Common{
-    protected Scanner scanner;                      //Parser pulls tokens from Scanner
+public class Compiler extends Common{
+    protected Scanner scanner;                      //Compiler pulls tokens from Scanner
     protected Source source;                        //Used to make 2nd pass of input stream
     protected long comparisonOperators = makeSet(   //Set of comparison operators
             equalToken,
@@ -35,9 +35,199 @@ public class Parser extends Common{
     protected Assembler assembler;
     protected Global global;
 
-    //Constructor. Returns a new Parser positioned at the first unignored token.
+    //  GLOBAL ARRAY DESCRIPTOR. Describe a global array.
+
+    private class GlobalArrayDescriptor extends GlobalDescriptor
+    {
+
+//  Constructor.
+
+        private GlobalArrayDescriptor(Type type, Label label)
+        {
+            this.type = type;
+            this.label = label;
+        }
+
+//  LVALUE. An array can't be alone on the left side of an assignment.
+
+        protected Allocator.Register lvalue()
+        {
+            throw new SnarlCompilerException("Cannot assign an array.");
+        }
+
+//  RVALUE. Return a register that holds the address of the global array.
+
+        protected Allocator.Register rvalue()
+        {
+            Allocator.Register register = allocator.request();
+            assembler.emit("la", register, label);
+            return register;
+        }
+
+//  TO STRING. For debugging.
+
+        public String toString()
+        {
+            return "[GlobalArrayDescriptor " + type + " " + label + "]";
+        }
+    }
+
+//  GLOBAL PROCEDURE DESCRIPTOR. Describe a procedure.
+
+    private class GlobalProcedureDescriptor extends GlobalDescriptor
+    {
+
+//  Constructor.
+
+        private GlobalProcedureDescriptor(Type type, Label label)
+        {
+            this.type = type;
+            this.label = label;
+        }
+
+//  LVALUE. A procedure can't be alone on the left side of an assignment.
+
+        protected Allocator.Register lvalue()
+        {
+            throw new SnarlCompilerException("Illegal Procedure Call.");
+        }
+
+//  RVALUE. A procedure can't be used as a variable name either.
+
+        protected Allocator.Register rvalue()
+        {
+            throw new SnarlCompilerException("Illegal Procedure Call.");
+        }
+
+//  TO STRING. For debugging.
+
+        public String toString()
+        {
+            return "[GlobalProcedureDescriptor " + type + " " + label + "]";
+        }
+    }
+
+//  GLOBAL VARIABLE DESCRIPTOR. Describe a global variable that's not an array.
+
+    private class GlobalVariableDescriptor extends GlobalDescriptor
+    {
+
+//  Constructor.
+
+        private GlobalVariableDescriptor(Type type, Label label)
+        {
+            this.type = type;
+            this.label = label;
+        }
+
+//  LVALUE. Return a register that holds the global variable's address.
+
+        protected Allocator.Register lvalue()
+        {
+            Allocator.Register register = allocator.request();
+            assembler.emit("la", register, label);
+            return register;
+        }
+
+//  RVALUE. Return a register that holds the global variable's value.
+
+        protected Allocator.Register rvalue()
+        {
+            Allocator.Register register = allocator.request();
+            assembler.emit("la", register, label);
+            if(type == intType){
+                assembler.emit("lw", register, 0, register);
+            }
+            return register;
+        }
+
+//  TO STRING. For debugging.
+
+        public String toString()
+        {
+            return "[GlobalVariableDescriptor " + type + " " + label + "]";
+        }
+    }
+
+//  LOCAL ARRAY DESCRIPTOR. Describe a local array variable.
+
+    private class LocalArrayDescriptor extends LocalDescriptor
+    {
+
+//  Constructor.
+
+        private LocalArrayDescriptor(Type type, int offset)
+        {
+            this.type = type;
+            this.offset = offset;
+        }
+
+//  LVALUE. An array can't be alone on the left side of an assignment.
+
+        protected Allocator.Register lvalue()
+        {
+            throw new SnarlCompilerException("Cannot assign an array.");
+        }
+
+//  RVALUE. Return a register that holds the address of a local array variable.
+
+        protected Allocator.Register rvalue()
+        {
+            Allocator.Register register = allocator.request();
+            assembler.emit("addi", register, allocator.fp, offset);
+            return register;
+        }
+
+//  TO STRING. For debugging.
+
+        public String toString()
+        {
+            return "[LocalArrayDescriptor " + type + " " + offset + "]";
+        }
+    }
+
+//  LOCAL VARIABLE DESCRIPTOR. Describe a local variable that's not an array.
+
+    private class LocalVariableDescriptor extends LocalDescriptor
+    {
+
+//  Constructor.
+
+        private LocalVariableDescriptor(Type type, int offset)
+        {
+            this.type = type;
+            this.offset = offset;
+        }
+
+//  LVALUE. Return a register that holds the address of the local variable.
+
+        protected Allocator.Register lvalue()
+        {
+            Allocator.Register register = allocator.request();
+            assembler.emit("addi", register, allocator.fp, offset);
+            return register;
+        }
+
+//  RVALUE. Return a register that holds the value of the local variable.
+
+        protected Allocator.Register rvalue()
+        {
+            Allocator.Register register = allocator.request();
+            assembler.emit("lw", register, offset, allocator.fp);
+            return register;
+        }
+
+//  TO STRING. For debugging.
+
+        public String toString()
+        {
+            return "[LocalVariableDescriptor " + type + " " + offset + "]";
+        }
+    }
+
+    //Constructor. Returns a new Compiler positioned at the first unignored token.
     
-    public Parser(Source source){
+    public Compiler(Source source){
         scanner = new Scanner(source);
         this.source = source;
         table = new SymbolTable();
@@ -45,7 +235,7 @@ public class Parser extends Common{
         intType = new BasicType("int",Type.wordSize,null);
         stringType = new BasicType("string",Type.addressSize,null);
         allocator = new Allocator();
-        assembler = new Assembler();
+        assembler = new Assembler("out.asm");
         global = new Global(assembler);
     }
     
@@ -67,6 +257,7 @@ public class Parser extends Common{
             if(scanner.getToken() == boldProcToken){
                 scanner.nextToken();
                 ProcedureType procedure = new ProcedureType();
+                Label label = new Label("proc");
                 String name = scanner.getString();
                 nextExpected(nameToken);
                 nextExpected(openParenToken);
@@ -118,7 +309,7 @@ public class Parser extends Common{
                         );
                     }
                 }
-                table.setDescriptor(name,new Descriptor(procedure));
+                table.setDescriptor(name,new GlobalProcedureDescriptor(procedure, label));
             }
             scanner.nextToken();
         }
@@ -178,7 +369,7 @@ public class Parser extends Common{
     protected void nextProgramPart(){
         enter("program part");
         if(isInSet(scanner.getToken(), declarationTokens)){
-            nextDeclaration();
+            nextGlobalDeclaration();
         } else if(scanner.getToken() == boldProcToken){
             nextProcedure();
         } else {
@@ -190,6 +381,7 @@ public class Parser extends Common{
     //NextGlobalDeclaration. Parses the next global declaration.
     
     protected void nextGlobalDeclaration(){
+        enter("global declaration");
         switch (scanner.getToken()){
             case boldIntToken: {
                 scanner.nextToken();
@@ -200,10 +392,19 @@ public class Parser extends Common{
                 break;
             }
             case boldStringToken: {
-                //TODO make string type like above
+                //TODO ask Moen...
             }
             case openBracketToken: {
-                //TODO make array type, similar to above except with GlobalArrayDescriptor
+                scanner.nextToken();
+                ArrayType type = new ArrayType(scanner.getInt(), intType);
+                nextExpected(intConstantToken);
+                nextExpected(closeBracketToken);
+                nextExpected(boldIntToken);
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                Label label = global.enterVariable(type);
+                table.setDescriptor(name, new GlobalArrayDescriptor(type, label));
+                break;
             }
             default: {
                 nextExpected(
@@ -213,12 +414,55 @@ public class Parser extends Common{
                 );
             }
         }
+        exit("global declaration");
     }
 
-    //NextDeclaration. Parses the next declaration.
+    //NextParameterDeclaration. Parses the next parameter declaration.
+
+    protected void nextParameterDeclaration(int arity){
+        enter("parameter declaration");
+        switch (scanner.getToken()){
+            case boldIntToken: {
+                scanner.nextToken();
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                Label label = global.enterVariable(intType);
+                table.setDescriptor(name, new LocalVariableDescriptor(intType, arity * -1 * Type.wordSize));
+                break;
+            }
+            case boldStringToken: {
+                //TODO ask Moen...
+            }
+            case openBracketToken: {
+                scanner.nextToken();
+                ArrayType type = new ArrayType(scanner.getInt(), intType);
+                nextExpected(intConstantToken);
+                nextExpected(closeBracketToken);
+                nextExpected(boldIntToken);
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                Label label = global.enterVariable(type);
+                table.setDescriptor(name, new LocalArrayDescriptor(type, arity * -1 * Type.wordSize));
+                break;
+            }
+            default: {
+                nextExpected(
+                        boldIntToken,
+                        boldStringToken,
+                        openBracketToken
+                );
+            }
+        }
+        exit("parameter declaration");
+    }
+
+    //NextLocalDeclaration. Parses the next local declaration.
     
-    protected void nextDeclaration(){          
+    protected int nextLocalDeclaration(int offset){          
         enter("declaration");
+        
+        int size;
+        
         switch (scanner.getToken()){
             case openBracketToken: {
                 ArrayType type;
@@ -227,24 +471,37 @@ public class Parser extends Common{
                 nextExpected(intConstantToken);
                 nextExpected(closeBracketToken);
                 nextExpected(boldIntToken);
-                table.setDescriptor(scanner.getString(), new Descriptor(type));
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                table.setDescriptor(name, new LocalArrayDescriptor(type, offset));
+                size = table.getDescriptor(name).getType().getSize();
                 break;
             }
             case boldIntToken: {
                 scanner.nextToken();
-                table.setDescriptor(scanner.getString(),new Descriptor(intType));
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                table.setDescriptor(name,new LocalVariableDescriptor(intType, offset));
+                size = Type.wordSize;
                 break;
             }
             case boldStringToken: {
                 scanner.nextToken();
-                table.setDescriptor(scanner.getString(),new Descriptor(stringType));
-                break;}
-            default: {nextExpected(boldIntToken, boldStringToken, openBracketToken);break;}
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                table.setDescriptor(name, new LocalVariableDescriptor(stringType, offset));
+                size = Type.addressSize;
+                break;
+            }
+            default: {
+                nextExpected(boldIntToken, boldStringToken, openBracketToken);
+                size = 0;
+            }
         }
 
-        nextExpected(nameToken);
-
         exit("declaration");
+        
+        return size;
     }
 
     //NextProcedure. Parses the next procedure.
@@ -252,6 +509,9 @@ public class Parser extends Common{
     protected void nextProcedure(){
         enter("procedure");
         nextExpected(boldProcToken);
+        
+        String name = scanner.getString();
+        
         nextExpected(nameToken);
 
         table.push();
@@ -273,8 +533,16 @@ public class Parser extends Common{
             }
         }
         nextExpected(colonToken);
+        
+        GlobalProcedureDescriptor descriptor = (GlobalProcedureDescriptor) table.getDescriptor(name);
 
-        nextBody();
+        int local = nextBody(((ProcedureType) descriptor.getType()).getArity() * Type.addressSize);
+        Label label = descriptor.getLabel();
+        
+        assembler.emit(label, "addi", allocator.sp, allocator.sp, -(40 + local));
+        assembler.emit(label, "sw", allocator.ra, 40, allocator.sp);
+        assembler.emit(label, "sw", allocator.fp, 36, allocator.sp);
+        //TODO: FINISH THIS!
         
         table.pop();
 
@@ -287,13 +555,17 @@ public class Parser extends Common{
         enter("parameters");
 
         nextExpected(openParenToken);
+        
+        int arity = 0;
 
         if (scanner.getToken() != closeParenToken) {
-            nextDeclaration();
+            nextParameterDeclaration(arity);
+            ++arity;
 
             while(scanner.getToken() == commaToken){
                 scanner.nextToken();
-                nextDeclaration();
+                nextParameterDeclaration(arity);
+                ++arity;
             }
         }
 
@@ -304,22 +576,26 @@ public class Parser extends Common{
 
     //NextBody. Parses the next body.
 
-    protected void nextBody(){
+    protected int nextBody(int parameterSize){
         enter("body");
+        
+        int size = 0;
 
         if(scanner.getToken() != boldBeginToken){
             
-            nextDeclaration();
+            size += nextLocalDeclaration(size + parameterSize);
 
             while(scanner.getToken() == semicolonToken){
                 scanner.nextToken();
-                nextDeclaration();
+                size += nextLocalDeclaration(size + parameterSize);
             }
         }
         
         nextBeginStatement();
 
         exit("body");
+        
+        return size;
     }
 
     //NextStatement. Parses the next statement.
@@ -473,11 +749,11 @@ public class Parser extends Common{
 
     //NextExpression. Parses the next expression.
 
-    protected Descriptor nextExpression(){
+    protected RegisterDescriptor nextExpression(){
         enter("expression");
         
-        Descriptor left = nextConjunction();
-        Descriptor right;
+        RegisterDescriptor left = nextConjunction();
+        RegisterDescriptor right;
 
         if (scanner.getToken() == boldOrToken) {
             typeCheck(left, intType);
@@ -495,11 +771,11 @@ public class Parser extends Common{
 
     //NextConjunction. Parses the next conjunction.
     
-    protected Descriptor nextConjunction(){
+    protected RegisterDescriptor nextConjunction(){
         enter("conjunction");
-        
-        Descriptor left = nextComparison();
-        Descriptor right;
+
+        RegisterDescriptor left = nextComparison();
+        RegisterDescriptor right;
 
         if (scanner.getToken() == boldAndToken) {
             typeCheck(left, intType);
@@ -517,11 +793,11 @@ public class Parser extends Common{
 
     //NextComparison. Parses the next comparison.
     
-    protected Descriptor nextComparison(){
+    protected RegisterDescriptor nextComparison(){
         enter("comparison");
-        
-        Descriptor left = nextSum();
-        Descriptor right;
+
+        RegisterDescriptor left = nextSum();
+        RegisterDescriptor right;
         
         if(isInSet(scanner.getToken(), comparisonOperators)){
             typeCheck(left, intType);
@@ -541,11 +817,11 @@ public class Parser extends Common{
 
     //NextSum. Parses the next sum.
 
-    protected Descriptor nextSum(){           
+    protected RegisterDescriptor nextSum(){           
         enter("sum");
-        
-        Descriptor left = nextProduct();
-        Descriptor right;
+
+        RegisterDescriptor left = nextProduct();
+        RegisterDescriptor right;
 
         if (isInSet(scanner.getToken(),sumOperators)) {
             typeCheck(left, intType);
@@ -563,11 +839,11 @@ public class Parser extends Common{
 
     //NextProduct. Parses the next product.
 
-    protected Descriptor nextProduct(){
+    protected RegisterDescriptor nextProduct(){
         enter("product");
 
-        Descriptor left = nextTerm();
-        Descriptor right;
+        RegisterDescriptor left = nextTerm();
+        RegisterDescriptor right;
 
         if (isInSet(scanner.getToken(), productOperators)) {
             typeCheck(left, intType);
@@ -585,7 +861,7 @@ public class Parser extends Common{
 
     //NextTerm. Parses the next term.
 
-    protected Descriptor nextTerm(){
+    protected RegisterDescriptor nextTerm(){
         enter("term");
 
         Boolean operator = false;
@@ -595,7 +871,7 @@ public class Parser extends Common{
             operator = true;
         }
 
-        Descriptor descriptor = nextUnit();
+        RegisterDescriptor descriptor = nextUnit();
 
         if(operator){
             typeCheck(descriptor, intType);
@@ -608,7 +884,7 @@ public class Parser extends Common{
 
     //NextUnit. Parses the next unit.
     
-    protected RegisterDescriptor nextUnit(){       //TODO: convert to RegisterDescriptors
+    protected RegisterDescriptor nextUnit(){       
         enter("unit");
         RegisterDescriptor registerDescriptor;
         switch (scanner.getToken()){
@@ -625,7 +901,7 @@ public class Parser extends Common{
                             throw new SnarlCompilerException(name + " is not a procedure.");
                         }
                         nextArguments((ProcedureType) type);
-                        registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue()); //TODO get register
+                        registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue(), null); //TODO get register
                         break;
                     }
                     case openBracketToken: {
@@ -635,11 +911,11 @@ public class Parser extends Common{
                         scanner.nextToken();
                         typeCheck(nextExpression(), intType);
                         nextExpected(closeBracketToken);
-                        registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase());  //TODO get register
+                        registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase(), null);  //TODO get register
                         break;
                     }
                     default: {
-                        registerDescriptor = table.getDescriptor(name);
+                        registerDescriptor = new RegisterDescriptor(table.getDescriptor(name).getType(), null);
                         break;
                     }
                 }

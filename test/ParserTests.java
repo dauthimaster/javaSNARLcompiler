@@ -16,16 +16,16 @@ public class ParserTests extends TestCase{
     
     public void testMakeSet(){
         Source source = new Source(new StringReader("ignored"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        long oneTwoThree = parser.makeSet(1,2,3);
-        long fourFiveSix = parser.makeSet(4,5,6);
+        long oneTwoThree = compiler.makeSet(1,2,3);
+        long fourFiveSix = compiler.makeSet(4,5,6);
         
         assertEquals((1L << 1 | 1L << 2 | 1L << 3),oneTwoThree);
         assertEquals((1L << 4 | 1L << 5 | 1L << 6),fourFiveSix);
         
         try{
-            long shouldFail = parser.makeSet(65);
+            long shouldFail = compiler.makeSet(65);
             fail("a long is only 64 bit");
         } catch (Throwable ignore){
             assertTrue(true);
@@ -34,25 +34,25 @@ public class ParserTests extends TestCase{
     
     public void testIsInSet(){
         Source source = new Source(new StringReader("ignored"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        long oneTwoThree = parser.makeSet(1,2,3);
-        long fourFiveSix = parser.makeSet(4,5,6);
+        long oneTwoThree = compiler.makeSet(1,2,3);
+        long fourFiveSix = compiler.makeSet(4,5,6);
         
-        assertTrue(parser.isInSet(1,oneTwoThree));
-        assertTrue(parser.isInSet(2,oneTwoThree));
-        assertTrue(parser.isInSet(3,oneTwoThree));
-        assertTrue(parser.isInSet(4,fourFiveSix));
-        assertTrue(parser.isInSet(5,fourFiveSix));
-        assertTrue(parser.isInSet(6,fourFiveSix));
+        assertTrue(compiler.isInSet(1,oneTwoThree));
+        assertTrue(compiler.isInSet(2,oneTwoThree));
+        assertTrue(compiler.isInSet(3,oneTwoThree));
+        assertTrue(compiler.isInSet(4,fourFiveSix));
+        assertTrue(compiler.isInSet(5,fourFiveSix));
+        assertTrue(compiler.isInSet(6,fourFiveSix));
     }
 
     public void testUnitOpenParen(){
         Source source = new Source(new StringReader("(0 or 1)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
         } catch (SnarlCompilerException e){
             fail("(0 or 1) is a unit " + e.message);
         }
@@ -60,10 +60,10 @@ public class ParserTests extends TestCase{
 
     public void testUnitInt(){
         Source source = new Source(new StringReader("1234"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
         } catch (SnarlCompilerException e){
             fail("1234 is a unit " + e.message);
         }
@@ -71,10 +71,10 @@ public class ParserTests extends TestCase{
 
     public void testUnitString(){
         Source source = new Source(new StringReader("\"JUnit <3\""));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
         } catch (SnarlCompilerException e){
             fail("\"JUnit <3\" is a unit " + e.message);
         }
@@ -82,12 +82,12 @@ public class ParserTests extends TestCase{
 
     public void testUnitName(){
         Source source = new Source(new StringReader("manBearPig"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
-        parser.table.setDescriptor("manBearPig",new Descriptor(parser.intType));
+        compiler.table.setDescriptor("manBearPig",new Descriptor(compiler.intType));
         
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
         } catch (SnarlCompilerException e){
             fail("manBearPig is a unit " + e.message);
         }
@@ -95,12 +95,12 @@ public class ParserTests extends TestCase{
 
     public void testUnitNameOpenParenNoArgs(){
         Source source = new Source(new StringReader("manBearPig()"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
-        parser.table.setDescriptor("manBearPig", new Descriptor(new ProcedureType()));
+        compiler.table.setDescriptor("manBearPig", new Descriptor(new ProcedureType()));
 
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
         } catch (SnarlCompilerException e){
             fail("manBearPig() is a unit " + e.message);
         }
@@ -108,14 +108,14 @@ public class ParserTests extends TestCase{
 
     public void testUnitNameOpenParenArgs(){
         Source source = new Source(new StringReader("manBearPig(1 or 0)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         ProcedureType proc = new ProcedureType();
-        proc.addParameter(parser.intType);
-        parser.table.setDescriptor("manBearPig", new Descriptor(proc));
+        proc.addParameter(compiler.intType);
+        compiler.table.setDescriptor("manBearPig", new Descriptor(proc));
 
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
         } catch (SnarlCompilerException e){
             fail("manBearPig(1 or 0) is a unit " + e.message);
         }
@@ -123,12 +123,12 @@ public class ParserTests extends TestCase{
 
     public void testUnitNameOpenBracket(){
         Source source = new Source(new StringReader("manBearPig[1 or 0]"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        parser.table.setDescriptor("manBearPig", new Descriptor(new ArrayType(1, parser.intType)));
+        compiler.table.setDescriptor("manBearPig", new Descriptor(new ArrayType(1, compiler.intType)));
 
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
         } catch (SnarlCompilerException e){
             fail("manBearPig[1 or 0] is a unit " + e.message);
         }
@@ -136,10 +136,10 @@ public class ParserTests extends TestCase{
     
     public void testUnitFailure(){
         Source source = new Source(new StringReader("manBearPig(]"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextUnit();
+            compiler.nextUnit();
             fail("manBearPig(] is not a unit");
         } catch (SnarlCompilerException ignore){
             assertTrue(true);
@@ -148,13 +148,13 @@ public class ParserTests extends TestCase{
     
     public void testArgumentsSingle(){
         Source source = new Source(new StringReader("(1 or 0)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         ProcedureType proc = new ProcedureType();
-        proc.addParameter(parser.intType);
+        proc.addParameter(compiler.intType);
         
         try{
-            parser.nextArguments(proc);
+            compiler.nextArguments(proc);
         } catch (SnarlCompilerException e){
             fail("1 or 0 is an argument " + e.message);
         }
@@ -162,15 +162,15 @@ public class ParserTests extends TestCase{
 
     public void testArgumentsMulti(){
         Source source = new Source(new StringReader("(1 or 0, 2, 13)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         ProcedureType proc = new ProcedureType();
-        proc.addParameter(parser.intType);
-        proc.addParameter(parser.intType);
-        proc.addParameter(parser.intType);
+        proc.addParameter(compiler.intType);
+        proc.addParameter(compiler.intType);
+        proc.addParameter(compiler.intType);
 
         try{
-            parser.nextArguments(proc);
+            compiler.nextArguments(proc);
         } catch (SnarlCompilerException e){
             fail("1 or 0, 2, 13 are arguments " + e.message);
         }
@@ -178,13 +178,13 @@ public class ParserTests extends TestCase{
 
     public void testArgumentsFail(){
         Source source = new Source(new StringReader("(1 or 0 2)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         ProcedureType proc = new ProcedureType();
-        proc.addParameter(parser.intType);
+        proc.addParameter(compiler.intType);
         
         try{
-            parser.nextArguments(proc);
+            compiler.nextArguments(proc);
             fail("1 or 0 2 is missing a comma");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -193,10 +193,10 @@ public class ParserTests extends TestCase{
     
     public void testTermNoOp(){
         Source source = new Source(new StringReader("2"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextTerm();
+            compiler.nextTerm();
         } catch (SnarlCompilerException e){
             fail("2 is a term " + e.message);
         }
@@ -204,10 +204,10 @@ public class ParserTests extends TestCase{
 
     public void testTermOneOp(){
         Source source = new Source(new StringReader("-2"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextTerm();
+            compiler.nextTerm();
         } catch (SnarlCompilerException e){
             fail("-2 is a term " + e.message);
         }
@@ -215,10 +215,10 @@ public class ParserTests extends TestCase{
 
     public void testTermMultiOp(){
         Source source = new Source(new StringReader("-not-not-2"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextTerm();
+            compiler.nextTerm();
         } catch (SnarlCompilerException e){
             fail("-not-not-2 is a term " + e.message);
         }
@@ -226,10 +226,10 @@ public class ParserTests extends TestCase{
     
     public void testProductSingle(){
         Source source = new Source(new StringReader("5"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextProduct();
+            compiler.nextProduct();
         } catch (SnarlCompilerException e){
             fail("5 is a product " + e.message);
         }
@@ -237,10 +237,10 @@ public class ParserTests extends TestCase{
     
     public void testProductNorm(){
         Source source = new Source(new StringReader("5 * 7"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextProduct();
+            compiler.nextProduct();
         } catch (SnarlCompilerException e){
             fail("5 * 7 is a product " + e.message);
         }
@@ -248,10 +248,10 @@ public class ParserTests extends TestCase{
 
     public void testProductMulti(){
         Source source = new Source(new StringReader("5 * 7 / 5"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProduct();
+            compiler.nextProduct();
         } catch (SnarlCompilerException e){
             fail("5 * 7 / 5 is a product " + e.message);
         }
@@ -259,10 +259,10 @@ public class ParserTests extends TestCase{
     
     public void testSumSingle(){
         Source source = new Source(new StringReader("3"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextSum();
+            compiler.nextSum();
         } catch (SnarlCompilerException e){
             fail("3 is a sum " + e.message);
         }
@@ -270,10 +270,10 @@ public class ParserTests extends TestCase{
 
     public void testSumNorm(){
         Source source = new Source(new StringReader("3 + 5"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextSum();
+            compiler.nextSum();
         } catch (SnarlCompilerException e){
             fail("3 + 5 is a sum " + e.message);
         }
@@ -281,10 +281,10 @@ public class ParserTests extends TestCase{
 
     public void testSumMulti(){
         Source source = new Source(new StringReader("3 + 5 - 8"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextSum();
+            compiler.nextSum();
         } catch (SnarlCompilerException e){
             fail("3 + 5 - 8 is a sum " + e.message);
         }
@@ -292,10 +292,10 @@ public class ParserTests extends TestCase{
     
     public void testComparisonSingle(){
         Source source = new Source(new StringReader("42"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextComparison();
+            compiler.nextComparison();
         } catch (SnarlCompilerException e){
             fail("42 is a comparison " + e.message);
         }
@@ -303,10 +303,10 @@ public class ParserTests extends TestCase{
 
     public void testComparisonNorm(){
         Source source = new Source(new StringReader("42 > 11"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextComparison();
+            compiler.nextComparison();
         } catch (SnarlCompilerException e){
             fail("42 > 11 is a comparison " + e.message);
         }
@@ -314,10 +314,10 @@ public class ParserTests extends TestCase{
 
     public void testComparisonFail(){
         Source source = new Source(new StringReader("42 > 11 > -5"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextComparison();
+            compiler.nextComparison();
             fail("42 > 11 > -5 is not a comparison");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -326,10 +326,10 @@ public class ParserTests extends TestCase{
     
     public void testConjunctionSingle(){
         Source source = new Source(new StringReader("29"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextConjunction();
+            compiler.nextConjunction();
         } catch (SnarlCompilerException e){
             fail("29 is a conjunction " + e.message);
         }
@@ -337,10 +337,10 @@ public class ParserTests extends TestCase{
 
     public void testConjunctionNorm(){
         Source source = new Source(new StringReader("29 and 404"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextConjunction();
+            compiler.nextConjunction();
         } catch (SnarlCompilerException e){
             fail("29 and 404 is a conjunction " + e.message);
         }
@@ -348,10 +348,10 @@ public class ParserTests extends TestCase{
 
     public void testConjunctionMulti(){
         Source source = new Source(new StringReader("29 and 404 and 500"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextConjunction();
+            compiler.nextConjunction();
         } catch (SnarlCompilerException e){
             fail("29 and 404 and 500 is a conjunction " + e.message);
         }
@@ -359,10 +359,10 @@ public class ParserTests extends TestCase{
 
     public void testExpressionSingle(){
         Source source = new Source(new StringReader("202"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextExpression();
+            compiler.nextExpression();
         } catch (SnarlCompilerException e){
             fail("202 is an expression " + e.message);
         }
@@ -370,10 +370,10 @@ public class ParserTests extends TestCase{
                    
     public void testExpressionNorm(){
         Source source = new Source(new StringReader("2 or 1"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextExpression();
+            compiler.nextExpression();
         } catch (SnarlCompilerException e){
             fail("2 or 1 is an expression " + e.message);
         }
@@ -381,10 +381,10 @@ public class ParserTests extends TestCase{
 
     public void testExpressionMulti(){
         Source source = new Source(new StringReader("2 or 1 or 0"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextExpression();
+            compiler.nextExpression();
         } catch (SnarlCompilerException e){
             fail("2 or 1 or 0 is an expression " + e.message);
         }
@@ -392,10 +392,10 @@ public class ParserTests extends TestCase{
     
     public void testWhileStatementNorm(){
         Source source = new Source(new StringReader("while 1 do begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextWhileStatement();
+            compiler.nextWhileStatement();
         } catch (SnarlCompilerException e){
             fail("while 1 do begin end is a while statement " + e.message);
         }
@@ -403,10 +403,10 @@ public class ParserTests extends TestCase{
 
     public void testWhileStatementNested(){
         Source source = new Source(new StringReader("while 1 do while 0 do begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextWhileStatement();
+            compiler.nextWhileStatement();
         } catch (SnarlCompilerException e){
             fail("while 1 do while 0 do begin end is a while statement " + e.message);
         }
@@ -414,10 +414,10 @@ public class ParserTests extends TestCase{
 
     public void testWhileStatementFailWhile(){
         Source source = new Source(new StringReader("wile 1 do begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextWhileStatement();
+            compiler.nextWhileStatement();
             fail("wile 1 do begin end is not a while statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -426,10 +426,10 @@ public class ParserTests extends TestCase{
 
     public void testWhileStatementFailDo(){
         Source source = new Source(new StringReader("while 1 o begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextWhileStatement();
+            compiler.nextWhileStatement();
             fail("while 1 o begin end is not a while statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -438,12 +438,12 @@ public class ParserTests extends TestCase{
 
     public void testValueStatement(){
         Source source = new Source(new StringReader("value 21"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        parser.procValType = parser.intType;
+        compiler.procValType = compiler.intType;
 
         try{
-            parser.nextValueStatement();         
+            compiler.nextValueStatement();
         } catch (SnarlCompilerException e){
             fail("value 21 is a value statement " + e.message);
         }
@@ -451,10 +451,10 @@ public class ParserTests extends TestCase{
 
     public void testValueStatementFail(){
         Source source = new Source(new StringReader("val 21"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextValueStatement();
+            compiler.nextValueStatement();
             fail("val 21 is not a value statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -463,10 +463,10 @@ public class ParserTests extends TestCase{
     
     public void testIfStatementNoElse(){
         Source source = new Source(new StringReader("if 1 then begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextIfStatement();
+            compiler.nextIfStatement();
         } catch (SnarlCompilerException e){
             fail("if 1 then begin end is an if statement " + e.message);
         }
@@ -474,10 +474,10 @@ public class ParserTests extends TestCase{
 
     public void testIfStatementWithElse(){
         Source source = new Source(new StringReader("if 1 then begin end else begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextIfStatement();
+            compiler.nextIfStatement();
         } catch (SnarlCompilerException e){
             fail("if 1 then begin end else begin end is an if statement " + e.message);
         }
@@ -486,10 +486,10 @@ public class ParserTests extends TestCase{
     public void testIfStatementWithDanglingElse(){
         Source source = new Source(new StringReader(
                 "if 1 then if 0 then begin end else begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextIfStatement();
+            compiler.nextIfStatement();
         } catch (SnarlCompilerException e){
             fail("if 1 then if 0 then begin end else begin end is an if statement " + e.message);
         }
@@ -497,10 +497,10 @@ public class ParserTests extends TestCase{
 
     public void testIfStatementFailIf(){
         Source source = new Source(new StringReader("f 1 then begin end else begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextIfStatement();
+            compiler.nextIfStatement();
             fail("f 1 then begin end else begin end is not an if statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -509,10 +509,10 @@ public class ParserTests extends TestCase{
 
     public void testIfStatementFailThen(){
         Source source = new Source(new StringReader("if 1 ten begin end else begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextIfStatement();
+            compiler.nextIfStatement();
             fail("if 1 ten begin end else begin end is not an if statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -521,10 +521,10 @@ public class ParserTests extends TestCase{
     
     public void testCodeStatement(){
         Source source = new Source(new StringReader("code \"code goes here\""));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextCodeStatement();
+            compiler.nextCodeStatement();
         } catch (SnarlCompilerException e){
             fail("code \"code goes here\" is a code statement " + e.message);
         }
@@ -532,10 +532,10 @@ public class ParserTests extends TestCase{
 
     public void testCodeStatementFail(){
         Source source = new Source(new StringReader("ode \"code goes here\""));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextCodeStatement();
+            compiler.nextCodeStatement();
             fail("ode \"code goes here\" is not a code statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -544,10 +544,10 @@ public class ParserTests extends TestCase{
     
     public void testBeginStatementNoStatement(){
         Source source = new Source(new StringReader("begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextBeginStatement();
+            compiler.nextBeginStatement();
         } catch (SnarlCompilerException e){
             fail("begin end is a begin statement " + e.message);
         }
@@ -555,10 +555,10 @@ public class ParserTests extends TestCase{
 
     public void testBeginStatementWithStatement(){
         Source source = new Source(new StringReader("begin code \"code goes here\" end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextBeginStatement();
+            compiler.nextBeginStatement();
         } catch (SnarlCompilerException e){
             fail("begin code \"code goes here\" end is a begin statement " + e.message);
         }
@@ -566,10 +566,10 @@ public class ParserTests extends TestCase{
 
     public void testBeginStatementWithMultiStatement(){
         Source source = new Source(new StringReader("begin code \"blah\"; code \"blah\" end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextBeginStatement();
+            compiler.nextBeginStatement();
         } catch (SnarlCompilerException e){
             fail("begin code \"blah\"; code \"blah\" end is a begin statement " + e.message);
         }
@@ -577,10 +577,10 @@ public class ParserTests extends TestCase{
 
     public void testBeginStatementFailBegin(){
         Source source = new Source(new StringReader("bgin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextBeginStatement();
+            compiler.nextBeginStatement();
             fail("bgin end is not a begin statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -589,10 +589,10 @@ public class ParserTests extends TestCase{
 
     public void testBeginStatementFailMultiNoSemicolon(){
         Source source = new Source(new StringReader("begin code \"blah\" code \"blah\" end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextBeginStatement();
+            compiler.nextBeginStatement();
             fail("begin code \"blah\" code \"blah\" end is not a begin statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -601,10 +601,10 @@ public class ParserTests extends TestCase{
 
     public void testBeginStatementFailEnd(){
         Source source = new Source(new StringReader("begin ed"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextBeginStatement();
+            compiler.nextBeginStatement();
             fail("begin ed is not a begin statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -613,12 +613,12 @@ public class ParserTests extends TestCase{
     
     public void testAssignmentOrCallStatementParenNoArgs(){
         Source source = new Source(new StringReader("meow()"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        parser.table.setDescriptor("meow", new Descriptor(new ProcedureType()));
+        compiler.table.setDescriptor("meow", new Descriptor(new ProcedureType()));
         
         try{
-            parser.nextAssignmentOrCallStatement();
+            compiler.nextAssignmentOrCallStatement();
         } catch (SnarlCompilerException e){
             fail("meow() is an assignment or call statement " + e.message);
         }
@@ -626,14 +626,14 @@ public class ParserTests extends TestCase{
 
     public void testAssignmentOrCallStatementParenWithArgs(){
         Source source = new Source(new StringReader("meow(1)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         ProcedureType proc = new ProcedureType();
-        proc.addParameter(parser.intType);
-        parser.table.setDescriptor("meow", new Descriptor(proc));
+        proc.addParameter(compiler.intType);
+        compiler.table.setDescriptor("meow", new Descriptor(proc));
 
         try{
-            parser.nextAssignmentOrCallStatement();
+            compiler.nextAssignmentOrCallStatement();
         } catch (SnarlCompilerException e){
             fail("meow(1) is an assignment or call statement " + e.message);
         }
@@ -641,12 +641,12 @@ public class ParserTests extends TestCase{
 
     public void testAssignmentOrCallStatementBracket(){
         Source source = new Source(new StringReader("meow[1] := 42"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        parser.table.setDescriptor("meow", new Descriptor(new ArrayType(1, parser.intType)));
+        compiler.table.setDescriptor("meow", new Descriptor(new ArrayType(1, compiler.intType)));
 
         try{
-            parser.nextAssignmentOrCallStatement();
+            compiler.nextAssignmentOrCallStatement();
         } catch (SnarlCompilerException e){
             fail("meow[1] := 42 is an assignment or call statement " + e.message);
         }
@@ -654,12 +654,12 @@ public class ParserTests extends TestCase{
 
     public void testAssignmentOrCallStatementColonEqual(){
         Source source = new Source(new StringReader("meow := 42"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        parser.table.setDescriptor("meow", new Descriptor(parser.intType));
+        compiler.table.setDescriptor("meow", new Descriptor(compiler.intType));
 
         try{
-            parser.nextAssignmentOrCallStatement();
+            compiler.nextAssignmentOrCallStatement();
         } catch (SnarlCompilerException e){
             fail("meow := 42 is an assignment or call statement " + e.message);
         }
@@ -667,10 +667,10 @@ public class ParserTests extends TestCase{
 
     public void testAssignmentOrCallStatementFailName(){
         Source source = new Source(new StringReader("()"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextAssignmentOrCallStatement();
+            compiler.nextAssignmentOrCallStatement();
             fail("() is not an assignment or call statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -679,10 +679,10 @@ public class ParserTests extends TestCase{
 
     public void testAssignmentOrCallStatementFailNamePlusInvalid(){
         Source source = new Source(new StringReader("meow)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextAssignmentOrCallStatement();
+            compiler.nextAssignmentOrCallStatement();
             fail("meow) is not an assignment or call statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -691,10 +691,10 @@ public class ParserTests extends TestCase{
 
     public void testAssignmentOrCallStatementFailNoCloseBracket(){
         Source source = new Source(new StringReader("meow[1 := 404"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextAssignmentOrCallStatement();
+            compiler.nextAssignmentOrCallStatement();
             fail("meow[1 := 404 is not an assignment or call statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -703,12 +703,12 @@ public class ParserTests extends TestCase{
 
     public void testStatementName(){
         Source source = new Source(new StringReader("meow := 1"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        parser.table.setDescriptor("meow", new Descriptor(parser.intType));
+        compiler.table.setDescriptor("meow", new Descriptor(compiler.intType));
 
         try{
-            parser.nextStatement();
+            compiler.nextStatement();
         } catch (SnarlCompilerException e){
             fail("meow := 1 is a statement " + e.message);
         }
@@ -716,10 +716,10 @@ public class ParserTests extends TestCase{
 
     public void testStatementBegin(){
         Source source = new Source(new StringReader("begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextStatement();
+            compiler.nextStatement();
         } catch (SnarlCompilerException e){
             fail("begin end is a statement " + e.message);
         }
@@ -727,10 +727,10 @@ public class ParserTests extends TestCase{
 
     public void testStatementCode(){
         Source source = new Source(new StringReader("code \"blah\""));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextStatement();
+            compiler.nextStatement();
         } catch (SnarlCompilerException e){
             fail("code \"blah\" is a statement " + e.message);
         }
@@ -738,10 +738,10 @@ public class ParserTests extends TestCase{
 
     public void testStatementIf(){
         Source source = new Source(new StringReader("if 1 then begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextStatement();
+            compiler.nextStatement();
         } catch (SnarlCompilerException e){
             fail("if 1 then begin end is a statement " + e.message);
         }
@@ -749,12 +749,12 @@ public class ParserTests extends TestCase{
 
     public void testStatementValue(){
         Source source = new Source(new StringReader("value 1"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
-        parser.procValType = parser.intType;
+        compiler.procValType = compiler.intType;
 
         try{
-            parser.nextStatement();
+            compiler.nextStatement();
         } catch (SnarlCompilerException e){
             fail("value 1 is a statement " + e.message);
         }
@@ -762,10 +762,10 @@ public class ParserTests extends TestCase{
 
     public void testStatementWhile(){
         Source source = new Source(new StringReader("while 1 do begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextStatement();
+            compiler.nextStatement();
         } catch (SnarlCompilerException e){
             fail("while 1 do begin end is a statement " + e.message);
         }
@@ -773,10 +773,10 @@ public class ParserTests extends TestCase{
     
     public void testStatementFail(){
         Source source = new Source(new StringReader("1 < 2"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextStatement();
+            compiler.nextStatement();
             fail("1 < 2 is not a statement.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -785,10 +785,10 @@ public class ParserTests extends TestCase{
     
     public void testBodyNoDeclarations(){
         Source source = new Source(new StringReader("begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextBody();
+            compiler.nextBody();
         } catch (SnarlCompilerException e){
             fail("begin end is a body statement " + e.message);
         }
@@ -796,10 +796,10 @@ public class ParserTests extends TestCase{
 
     public void testBodySingleDeclaration(){
         Source source = new Source(new StringReader("int top begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextBody();
+            compiler.nextBody();
         } catch (SnarlCompilerException e){
             fail("int top begin end is a body statement " + e.message);
         }
@@ -807,10 +807,10 @@ public class ParserTests extends TestCase{
 
     public void testBodyMultiDeclarations(){
         Source source = new Source(new StringReader("int top; int bottom begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextBody();
+            compiler.nextBody();
         } catch (SnarlCompilerException e){       
             fail("int top; int bottom begin end is a body statement " + e.message);
         }
@@ -818,10 +818,10 @@ public class ParserTests extends TestCase{
     
     public void testParametersSingle(){
         Source source = new Source(new StringReader("(int top)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextParameters();
+            compiler.nextParameters();
         } catch (SnarlCompilerException e){
             fail("(int top) is a parameter " + e.message);
         }
@@ -829,10 +829,10 @@ public class ParserTests extends TestCase{
 
     public void testParametersMulti(){
         Source source = new Source(new StringReader("(int top, int bottom)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextParameters();
+            compiler.nextParameters();
         } catch (SnarlCompilerException e){
             fail("(int top, int bottom are parameters)" + e.message);
         }
@@ -840,10 +840,10 @@ public class ParserTests extends TestCase{
 
     public void testParametersFailOpenParen(){
         Source source = new Source(new StringReader("int top)"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextParameters();
+            compiler.nextParameters();
             fail("int top) is not a parameter.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -852,10 +852,10 @@ public class ParserTests extends TestCase{
 
     public void testParametersFailCloseParen(){
         Source source = new Source(new StringReader("(int top"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextParameters();
+            compiler.nextParameters();
             fail("(int top is not a parameter.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -864,10 +864,10 @@ public class ParserTests extends TestCase{
     
     public void testProcedureNoParams(){
         Source source = new Source(new StringReader("proc rescue() int: begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
         } catch (SnarlCompilerException e){
             fail("proc rescue() int: begin end is a procedure " + e.message);
         }
@@ -875,10 +875,10 @@ public class ParserTests extends TestCase{
 
     public void testProcedureValueStatement(){
         Source source = new Source(new StringReader("proc rescue() int: begin value 22 end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
         } catch (SnarlCompilerException e){
             fail("proc rescue() int: begin end is a procedure " + e.message);
         }
@@ -886,10 +886,10 @@ public class ParserTests extends TestCase{
 
     public void testProcedureParams(){
         Source source = new Source(new StringReader("proc rescue(int top) int: begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
         } catch (SnarlCompilerException e){
             fail("proc rescue(int top) int: begin end is a procedure " + e.message);
         }
@@ -897,10 +897,10 @@ public class ParserTests extends TestCase{
 
     public void testProcedureString(){
         Source source = new Source(new StringReader("proc rescue() string: begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
         } catch (SnarlCompilerException e){
             fail("proc rescue() string: begin end is a procedure " + e.message);
         }
@@ -908,10 +908,10 @@ public class ParserTests extends TestCase{
 
     public void testProcedureFailProc(){
         Source source = new Source(new StringReader("pro rescue() int: begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
             fail("pro rescue() int: begin end is not a procedure.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -920,10 +920,10 @@ public class ParserTests extends TestCase{
 
     public void testProcedureFailName(){
         Source source = new Source(new StringReader("proc () int: begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
             fail("proc () int: begin end is not a procedure.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -932,10 +932,10 @@ public class ParserTests extends TestCase{
 
     public void testProcedureFailNoIntString(){
         Source source = new Source(new StringReader("proc rescue() : begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
             fail("proc rescue() : begin end is not a procedure.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -944,10 +944,10 @@ public class ParserTests extends TestCase{
 
     public void testProcedureFailColon(){
         Source source = new Source(new StringReader("proc rescue() int begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProcedure();
+            compiler.nextProcedure();
             fail("proc rescue() int begin end is not a procedure.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -956,10 +956,10 @@ public class ParserTests extends TestCase{
     
     public void testDeclarationInt(){
         Source source = new Source(new StringReader("int sleep"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextDeclaration();
+            compiler.nextDeclaration();
         } catch (SnarlCompilerException e){
             fail("int sleep is a declaration " + e.message);
         }
@@ -967,10 +967,10 @@ public class ParserTests extends TestCase{
 
     public void testDeclarationString(){
         Source source = new Source(new StringReader("string sleep"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextDeclaration();
+            compiler.nextDeclaration();
         } catch (SnarlCompilerException e){
             fail("string sleep is a declaration " + e.message);
         }
@@ -978,10 +978,10 @@ public class ParserTests extends TestCase{
 
     public void testDeclarationOpenBracket(){
         Source source = new Source(new StringReader("[10]int sleep"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextDeclaration();
+            compiler.nextDeclaration();
         } catch (SnarlCompilerException e){
             fail("[10]int sleep is a declaration " + e.message);
         }
@@ -989,10 +989,10 @@ public class ParserTests extends TestCase{
     
     public void testDeclarationFail(){
         Source source = new Source(new StringReader("proc rescue() int: begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextDeclaration();
+            compiler.nextDeclaration();
             fail("proc rescue() int: begin end is not a declaration.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -1001,10 +1001,10 @@ public class ParserTests extends TestCase{
     
     public void testDeclarationFailBrackets(){
         Source source = new Source(new StringReader("[20]string fail"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextDeclaration();
+            compiler.nextDeclaration();
             fail("[20]string fail is not a declaration.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -1013,10 +1013,10 @@ public class ParserTests extends TestCase{
 
     public void testDeclarationFailName(){
         Source source = new Source(new StringReader("int string fail"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextDeclaration();
+            compiler.nextDeclaration();
             fail("int string fail is not a declaration.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -1025,10 +1025,10 @@ public class ParserTests extends TestCase{
     
     public void testDeclarationFailMoenEdgeCase(){
         Source source = new Source(new StringReader("int 37] int foo"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextDeclaration();
+            compiler.nextDeclaration();
             fail("int 37] int foo is not a legal declaration");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -1037,10 +1037,10 @@ public class ParserTests extends TestCase{
     
     public void testProgramPartDeclaration(){
         Source source = new Source(new StringReader("int meow"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{             
-            parser.nextProgramPart();
+            compiler.nextProgramPart();
         } catch (SnarlCompilerException e){
             fail("int meow is a program part " + e.message);
         }
@@ -1048,10 +1048,10 @@ public class ParserTests extends TestCase{
                      
     public void testProgramPartProcedure(){
         Source source = new Source(new StringReader("proc rescue() int: begin end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextProgramPart();
+            compiler.nextProgramPart();
         } catch (SnarlCompilerException e){
             fail("proc rescue() int: begin end is a program part " + e.message);
         }
@@ -1059,10 +1059,10 @@ public class ParserTests extends TestCase{
     
     public void testProgramPartFail(){
         Source source = new Source(new StringReader("meow := \"cat\""));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextProgramPart();
+            compiler.nextProgramPart();
             fail("meow := \"cat\" is not a program part.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -1071,10 +1071,10 @@ public class ParserTests extends TestCase{
 
     public void testProgramSingle(){
         Source source = new Source(new StringReader("int meow"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.nextProgram();
+            compiler.nextProgram();
         } catch (SnarlCompilerException e){
             fail("int meow is a program");
         }
@@ -1082,10 +1082,10 @@ public class ParserTests extends TestCase{
 
     public void testProgramMulti(){
         Source source = new Source(new StringReader("int meow; int mug"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProgram();
+            compiler.nextProgram();
         } catch (SnarlCompilerException e){
             fail("int meow; int mug is a program");
         }
@@ -1093,10 +1093,10 @@ public class ParserTests extends TestCase{
 
     public void testProgramFail(){
         Source source = new Source(new StringReader("meow := 42"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
 
         try{
-            parser.nextProgram();
+            compiler.nextProgram();
             fail("meow := 42 is not a program.");
         } catch (SnarlCompilerException e){
             assertTrue(true);
@@ -1106,10 +1106,10 @@ public class ParserTests extends TestCase{
     public void testPassOne(){
         Source source = new Source(new StringReader("proc rescue() int: begin me() end; " +
                 "proc me() int: begin rescue() end"));
-        Parser parser = new Parser(source);
+        Compiler compiler = new Compiler(source);
         
         try{
-            parser.passOne();
+            compiler.passOne();
         } catch (SnarlCompilerException e){
             fail(e.message);
         }
