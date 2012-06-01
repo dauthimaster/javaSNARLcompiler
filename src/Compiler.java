@@ -409,7 +409,12 @@ public class Compiler extends Common{
                 break;
             }
             case boldStringToken: {
-                //TODO ask Moen...
+                scanner.nextToken();
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                Label label = global.enterVariable(stringType);
+                table.setDescriptor(name, new GlobalVariableDescriptor(stringType, label));
+                break;
             }
             case openBracketToken: {
                 scanner.nextToken();
@@ -443,14 +448,14 @@ public class Compiler extends Common{
                 scanner.nextToken();
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalVariableDescriptor(intType, arity * -1 * Type.wordSize));
+                table.setDescriptor(name, new LocalVariableDescriptor(intType, -1 * arity * Type.wordSize));
                 break;
             }
             case boldStringToken: {
                 scanner.nextToken();
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalVariableDescriptor(stringType, arity * -1 * Type.wordSize));
+                table.setDescriptor(name, new LocalVariableDescriptor(stringType, -1 * arity * Type.wordSize));
                 break;
             }
             case openBracketToken: {
@@ -461,7 +466,7 @@ public class Compiler extends Common{
                 nextExpected(boldIntToken);
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalArrayDescriptor(type, arity * -1 * Type.wordSize));
+                table.setDescriptor(name, new LocalArrayDescriptor(type, -1 * arity * Type.wordSize));
                 break;
             }
             default: {
@@ -555,7 +560,7 @@ public class Compiler extends Common{
         
         GlobalProcedureDescriptor descriptor = (GlobalProcedureDescriptor) table.getDescriptor(name);
 
-        nextBody(((ProcedureType) descriptor.getType()).getArity() * Type.addressSize, descriptor);
+        nextBody(descriptor);
         
         table.pop();
 
@@ -589,22 +594,22 @@ public class Compiler extends Common{
 
     //NextBody. Parses the next body.
 
-    protected void nextBody(int parameterSize, GlobalProcedureDescriptor descriptor){
+    protected void nextBody(GlobalProcedureDescriptor descriptor){
         enter("body");
         
         int local = 0;
-
+        Label label = descriptor.getLabel();
+        int arity = ((ProcedureType) descriptor.getType()).getArity();
+        
         if(scanner.getToken() != boldBeginToken){
             
-            local += nextLocalDeclaration(local + parameterSize);
+            local += nextLocalDeclaration(40 + local + arity * Type.addressSize * -1);
 
             while(scanner.getToken() == semicolonToken){
                 scanner.nextToken();
-                local += nextLocalDeclaration(local + parameterSize);
+                local += nextLocalDeclaration(40 + local + arity * Type.addressSize * -1);
             }
         }
-
-        Label label = descriptor.getLabel();
 
         assembler.emit(label, "addi", allocator.sp, allocator.sp, -(40 + local));
         assembler.emit("sw", allocator.ra, 40, allocator.sp);
@@ -613,7 +618,7 @@ public class Compiler extends Common{
             int offset = 32 - i * 4;
             assembler.emit("sw $s" + i + ", " + offset + "($sp)");
         }
-        assembler.emit("addi", allocator.fp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
+        assembler.emit("addi", allocator.fp, allocator.sp, (40 + local + 4 * arity));
         
         nextBeginStatement();
 
@@ -623,7 +628,7 @@ public class Compiler extends Common{
             int offset = 32 - i * 4;
             assembler.emit("lw $s" + i + ", " + offset + "($sp)");
         }
-        assembler.emit("addi", allocator.sp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
+        assembler.emit("addi", allocator.sp, allocator.sp, (40 + local + 4 * arity));
 
         exit("body");
     }
