@@ -555,25 +555,7 @@ public class Compiler extends Common{
         
         GlobalProcedureDescriptor descriptor = (GlobalProcedureDescriptor) table.getDescriptor(name);
 
-        int local = nextBody(((ProcedureType) descriptor.getType()).getArity() * Type.addressSize);
-        Label label = descriptor.getLabel();
-        
-        assembler.emit(label, "addi", allocator.sp, allocator.sp, -(40 + local));
-        assembler.emit("sw", allocator.ra, 40, allocator.sp);
-        assembler.emit("sw", allocator.fp, 36, allocator.sp);
-        for(int i = 0; i < 8; ++i){
-            int offset = 32 - i * 4;
-            assembler.emit("sw $s" + i + ", " + offset + "($sp)");
-        }
-        assembler.emit("addi", allocator.fp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
-        
-        assembler.emit("lw", allocator.ra, 40, allocator.sp);
-        assembler.emit("lw", allocator.fp, 36, allocator.sp);
-        for(int i = 0; i < 8; ++i){
-            int offset = 32 - i * 4;
-            assembler.emit("lw $s" + i + ", " + offset + "($sp)");
-        }
-        assembler.emit("addi", allocator.sp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
+        nextBody(((ProcedureType) descriptor.getType()).getArity() * Type.addressSize, descriptor);
         
         table.pop();
 
@@ -607,26 +589,43 @@ public class Compiler extends Common{
 
     //NextBody. Parses the next body.
 
-    protected int nextBody(int parameterSize){
+    protected void nextBody(int parameterSize, GlobalProcedureDescriptor descriptor){
         enter("body");
         
-        int size = 0;
+        int local = 0;
 
         if(scanner.getToken() != boldBeginToken){
             
-            size += nextLocalDeclaration(size + parameterSize);
+            local += nextLocalDeclaration(local + parameterSize);
 
             while(scanner.getToken() == semicolonToken){
                 scanner.nextToken();
-                size += nextLocalDeclaration(size + parameterSize);
+                local += nextLocalDeclaration(local + parameterSize);
             }
         }
+
+        Label label = descriptor.getLabel();
+
+        assembler.emit(label, "addi", allocator.sp, allocator.sp, -(40 + local));
+        assembler.emit("sw", allocator.ra, 40, allocator.sp);
+        assembler.emit("sw", allocator.fp, 36, allocator.sp);
+        for(int i = 0; i < 8; ++i){
+            int offset = 32 - i * 4;
+            assembler.emit("sw $s" + i + ", " + offset + "($sp)");
+        }
+        assembler.emit("addi", allocator.fp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
         
         nextBeginStatement();
 
+        assembler.emit("lw", allocator.ra, 40, allocator.sp);
+        assembler.emit("lw", allocator.fp, 36, allocator.sp);
+        for(int i = 0; i < 8; ++i){
+            int offset = 32 - i * 4;
+            assembler.emit("lw $s" + i + ", " + offset + "($sp)");
+        }
+        assembler.emit("addi", allocator.sp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
+
         exit("body");
-        
-        return size;
     }
 
     //NextStatement. Parses the next statement.
@@ -921,17 +920,17 @@ public class Compiler extends Common{
         switch (scanner.getToken()){
             case nameToken: {
                 String name = scanner.getString();
-                Type type = table.getDescriptor(name).getType();
-                scanner.nextToken();
                 NameDescriptor descriptor = table.getDescriptor(name);
-                Allocator.Register register;
+                Type type = descriptor.getType();
+                scanner.nextToken();
+                Allocator.Register register = null;
                 switch(scanner.getToken()){
                     case openParenToken: {
                         if(!(type instanceof ProcedureType)){
                             throw new SnarlCompilerException(name + " is not a procedure.");
                         }
                         nextArguments((ProcedureType) type);
-                        registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue(), null); //TODO get register
+                        registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue(), register); //TODO get register
                         break;
                     }
                     case openBracketToken: {
@@ -941,11 +940,11 @@ public class Compiler extends Common{
                         scanner.nextToken();
                         typeCheck(nextExpression(), intType);
                         nextExpected(closeBracketToken);
-                        registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase(), null);  //TODO get register
+                        registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase(), register);  //TODO get register
                         break;
                     }
                     default: {
-                        registerDescriptor = new RegisterDescriptor(table.getDescriptor(name).getType(), null);
+                        registerDescriptor = new RegisterDescriptor(table.getDescriptor(name).getType(), register);
                         break;
                     }
                 }
@@ -1061,7 +1060,7 @@ public class Compiler extends Common{
             scanner.nextToken();
         } else {
             StringBuilder error = new StringBuilder();
-            for(int i = 0; i < tokens.length - 1; i++){
+            for(int i = 0; i < tokens.length - 1; ++i){
                 error.append(tokenToString(tokens[i]));
                 error.append(" or ");
             }
