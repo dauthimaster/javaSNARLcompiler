@@ -1,9 +1,12 @@
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
 /*
 SNARL/Compiler
 
 James Current
 1/30/12
- */
+*/
 public class Compiler extends Common{
     protected Scanner scanner;                      //Compiler pulls tokens from Scanner
     protected Source source;                        //Used to make 2nd pass of input stream
@@ -225,7 +228,7 @@ public class Compiler extends Common{
         }
     }
 
-    //Constructor. Returns a new Compiler positioned at the first unignored token.
+    //Constructor. Returns a new Compiler positioned at the first unignored token, uses a default output filename.
     
     public Compiler(Source source){
         scanner = new Scanner(source);
@@ -236,6 +239,20 @@ public class Compiler extends Common{
         stringType = new BasicType("string",Type.addressSize,null);
         allocator = new Allocator();
         assembler = new Assembler("out.asm");
+        global = new Global(assembler);
+    }
+    
+    //Constructor. Returns a new Compiler positioned at the first unignored token using the specified output filename.
+
+    public Compiler(Source source, String out){
+        scanner = new Scanner(source);
+        this.source = source;
+        table = new SymbolTable();
+        table.push();
+        intType = new BasicType("int",Type.wordSize,null);
+        stringType = new BasicType("string",Type.addressSize,null);
+        allocator = new Allocator();
+        assembler = new Assembler(out);
         global = new Global(assembler);
     }
     
@@ -426,12 +443,15 @@ public class Compiler extends Common{
                 scanner.nextToken();
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                Label label = global.enterVariable(intType);
                 table.setDescriptor(name, new LocalVariableDescriptor(intType, arity * -1 * Type.wordSize));
                 break;
             }
             case boldStringToken: {
-                //TODO ask Moen...
+                scanner.nextToken();
+                String name = scanner.getString();
+                nextExpected(nameToken);
+                table.setDescriptor(name, new LocalVariableDescriptor(stringType, arity * -1 * Type.wordSize));
+                break;
             }
             case openBracketToken: {
                 scanner.nextToken();
@@ -441,7 +461,6 @@ public class Compiler extends Common{
                 nextExpected(boldIntToken);
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                Label label = global.enterVariable(type);
                 table.setDescriptor(name, new LocalArrayDescriptor(type, arity * -1 * Type.wordSize));
                 break;
             }
@@ -540,9 +559,21 @@ public class Compiler extends Common{
         Label label = descriptor.getLabel();
         
         assembler.emit(label, "addi", allocator.sp, allocator.sp, -(40 + local));
-        assembler.emit(label, "sw", allocator.ra, 40, allocator.sp);
-        assembler.emit(label, "sw", allocator.fp, 36, allocator.sp);
-        //TODO: FINISH THIS!
+        assembler.emit("sw", allocator.ra, 40, allocator.sp);
+        assembler.emit("sw", allocator.fp, 36, allocator.sp);
+        for(int i = 0; i < 8; ++i){
+            int offset = 32 - i * 4;
+            assembler.emit("sw $s" + i + ", " + offset + "($sp)");
+        }
+        assembler.emit("addi", allocator.fp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
+        
+        assembler.emit("lw", allocator.ra, 40, allocator.sp);
+        assembler.emit("lw", allocator.fp, 36, allocator.sp);
+        for(int i = 0; i < 8; ++i){
+            int offset = 32 - i * 4;
+            assembler.emit("lw $s" + i + ", " + offset + "($sp)");
+        }
+        assembler.emit("addi", allocator.sp, allocator.sp, (40 + local + 4 * ((ProcedureType) descriptor.getType()).getArity()));
         
         table.pop();
 
@@ -893,8 +924,7 @@ public class Compiler extends Common{
                 Type type = table.getDescriptor(name).getType();
                 scanner.nextToken();
                 NameDescriptor descriptor = table.getDescriptor(name);
-                Allocator.Register register = descriptor.rvalue();
-                registerDescriptor = new RegisterDescriptor(type, register); //TODO clean this up, probly split it out to other places
+                Allocator.Register register;
                 switch(scanner.getToken()){
                     case openParenToken: {
                         if(!(type instanceof ProcedureType)){
@@ -968,20 +998,20 @@ public class Compiler extends Common{
         //int arity = 0;
 
         if(scanner.getToken() != closeParenToken){
+            if(params == null){
+                throw new SnarlCompilerException("Procedure has too many arguments");
+            }
             typeCheck(nextExpression(), params.getType());
             params = params.getNext();
-            if(params == null){
-                throw new SnarlCompilerException("Proc has too few args"); //TODO: cleanup
-            }
             //arity++;
 
             while(scanner.getToken() == commaToken){
                 scanner.nextToken();
+                if(params == null){
+                    throw new SnarlCompilerException("Procedure has too many arguments");
+                }
                 typeCheck(nextExpression(), params.getType());
                 params = params.getNext();
-                if(params == null){
-                    throw new SnarlCompilerException("Proc has too few args"); //TODO: cleanup
-                }
                 //arity++;
             }
         }
@@ -1039,13 +1069,23 @@ public class Compiler extends Common{
             throw new SnarlCompilerException("Expected " + error.toString() + ".");
         }
     }
-    
-    //Stub for rvalue method in GlobalVariableDescriptor
-    
-    protected Allocator.Register rvalue(){
-        Allocator.Register register = allocator.request();
-        assembler.emit("la", register, label);
-        assembler.emit("lw", register, 0, register);
-        return register;
+
+    public static void main(String[] args){
+        String file = args[0];
+        Compiler compiler = null;
+        Source source = null;
+        try {
+            source = new Source(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        compiler = new Compiler(source);
+
+        try {
+            compiler.passOne();
+        } catch (SnarlCompilerException e) {
+            e.printStackTrace();
+            source.error(e.getMessage());
+        }
     }
 }
