@@ -37,6 +37,7 @@ public class Compiler extends Common{
     protected Allocator allocator;
     protected Assembler assembler;
     protected Global global;
+    protected String opToString[];
 
     //  GLOBAL ARRAY DESCRIPTOR. Describe a global array.
 
@@ -240,6 +241,9 @@ public class Compiler extends Common{
         allocator = new Allocator();
         assembler = new Assembler("out.asm");
         global = new Global(assembler);
+        opToString = new String[maxToken];
+        opToString[plusToken] = "add";
+        opToString[dashToken] = "sub";
     }
     
     //Constructor. Returns a new Compiler positioned at the first unignored token using the specified output filename.
@@ -254,6 +258,9 @@ public class Compiler extends Common{
         allocator = new Allocator();
         assembler = new Assembler(out);
         global = new Global(assembler);
+        opToString = new String[maxToken];
+        opToString[plusToken] = "add";
+        opToString[dashToken] = "sub";
     }
     
    /* protected void errorRecoveryExample(){
@@ -787,21 +794,32 @@ public class Compiler extends Common{
     protected RegisterDescriptor nextExpression(){
         enter("expression");
         
-        RegisterDescriptor left = nextConjunction();
-        RegisterDescriptor right;
+        RegisterDescriptor first = nextConjunction();
 
         if (scanner.getToken() == boldOrToken) {
-            typeCheck(left, intType);
+            Label label = new Label("or");
+
+            typeCheck(first, intType);
+            Allocator.Register register = first.getRegister();
+
+            assembler.emit("sne", register, register, allocator.zero);
+
             while (scanner.getToken() == boldOrToken){
                 scanner.nextToken();
-                right = nextConjunction();
-                typeCheck(right, intType);
+                
+                RegisterDescriptor rest = nextConjunction();
+                typeCheck(rest, intType);
+
+                assembler.emit("bne", register, allocator.zero, label);
+                assembler.emit("sne", register, rest.getRegister(), allocator.zero);
+                allocator.release(rest.getRegister());
             }
+            assembler.emit(label);
         }
 
         exit("expression");
         
-        return left;
+        return first;
     }
 
     //NextConjunction. Parses the next conjunction.
@@ -810,13 +828,12 @@ public class Compiler extends Common{
         enter("conjunction");
 
         RegisterDescriptor left = nextComparison();
-        RegisterDescriptor right;
 
         if (scanner.getToken() == boldAndToken) {
             typeCheck(left, intType);
             while (scanner.getToken() == boldAndToken){
                 scanner.nextToken();
-                right = nextComparison();
+                RegisterDescriptor right = nextComparison();
                 typeCheck(right, intType);
             }
         }
@@ -832,12 +849,11 @@ public class Compiler extends Common{
         enter("comparison");
 
         RegisterDescriptor left = nextSum();
-        RegisterDescriptor right;
-        
+
         if(isInSet(scanner.getToken(), comparisonOperators)){
             typeCheck(left, intType);
             scanner.nextToken();
-            right = nextSum();
+            RegisterDescriptor right = nextSum();
             typeCheck(right, intType);
         }
 
@@ -855,21 +871,26 @@ public class Compiler extends Common{
     protected RegisterDescriptor nextSum(){           
         enter("sum");
 
-        RegisterDescriptor left = nextProduct();
-        RegisterDescriptor right;
+        RegisterDescriptor first = nextProduct();
 
         if (isInSet(scanner.getToken(),sumOperators)) {
-            typeCheck(left, intType);
+            typeCheck(first, intType);
+            Allocator.Register register = first.getRegister();
             while(isInSet(scanner.getToken(),sumOperators)){
+                int operator = scanner.getToken();
                 scanner.nextToken();
-                right = nextProduct();
-                typeCheck(right, intType);
+                RegisterDescriptor rest = nextProduct();
+                typeCheck(rest, intType);
+                
+                assembler.emit(opToString[operator], register, register, rest.getRegister());
+                
+                allocator.release(rest.getRegister());
             }
         }
 
         exit("sum");
 
-        return left;
+        return first;
     }
 
     //NextProduct. Parses the next product.
@@ -877,21 +898,21 @@ public class Compiler extends Common{
     protected RegisterDescriptor nextProduct(){
         enter("product");
 
-        RegisterDescriptor left = nextTerm();
-        RegisterDescriptor right;
+        RegisterDescriptor first = nextTerm();
 
         if (isInSet(scanner.getToken(), productOperators)) {
-            typeCheck(left, intType);
+            typeCheck(first, intType);
             while(isInSet(scanner.getToken(),productOperators)){
+                int operator = scanner.getToken();
                 scanner.nextToken();
-                right = nextTerm();
-                typeCheck(right, intType);
+                RegisterDescriptor rest = nextTerm();
+                typeCheck(rest, intType);
             }
         }
 
         exit("product");
         
-        return left;
+        return first;
     }
 
     //NextTerm. Parses the next term.
@@ -899,7 +920,7 @@ public class Compiler extends Common{
     protected RegisterDescriptor nextTerm(){
         enter("term");
 
-        Boolean operator = false;
+        /*Boolean operator = false;
         
         while(isInSet(scanner.getToken(),termOperators)){
             scanner.nextToken();
@@ -910,6 +931,29 @@ public class Compiler extends Common{
 
         if(operator){
             typeCheck(descriptor, intType);
+        }*/
+
+        RegisterDescriptor descriptor;
+        
+        switch (scanner.getToken()){
+            case dashToken: {
+                scanner.nextToken();
+                if(scanner.getToken() == intConstantToken){
+                    //generate code for a negative int constant
+                    scanner.nextToken();
+                } else {
+                    //generate code for a negative term
+                }
+                break;
+            }
+            case boldNotToken: {
+                //etc
+                break;
+            }
+            default: {
+                //etc
+                break;
+            }
         }
         
         exit("term");
