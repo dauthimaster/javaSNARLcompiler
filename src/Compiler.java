@@ -441,21 +441,21 @@ public class Compiler extends Common{
 
     //NextParameterDeclaration. Parses the next parameter declaration.
 
-    protected void nextParameterDeclaration(int arity){
+    protected void nextParameterDeclaration(int index){
         enter("parameter declaration");
         switch (scanner.getToken()){
             case boldIntToken: {
                 scanner.nextToken();
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalVariableDescriptor(intType, -1 * arity * Type.wordSize));
+                table.setDescriptor(name, new LocalVariableDescriptor(intType, -1 * index * Type.wordSize));
                 break;
             }
             case boldStringToken: {
                 scanner.nextToken();
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalVariableDescriptor(stringType, -1 * arity * Type.wordSize));
+                table.setDescriptor(name, new LocalVariableDescriptor(stringType, -1 * index * Type.wordSize));
                 break;
             }
             case openBracketToken: {
@@ -466,7 +466,7 @@ public class Compiler extends Common{
                 nextExpected(boldIntToken);
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalArrayDescriptor(type, -1 * arity * Type.wordSize));
+                table.setDescriptor(name, new LocalArrayDescriptor(type, -1 * index * Type.wordSize));
                 break;
             }
             default: {
@@ -498,7 +498,7 @@ public class Compiler extends Common{
                 String name = scanner.getString();
                 nextExpected(nameToken);
                 table.setDescriptor(name, new LocalArrayDescriptor(type, offset));
-                size = table.getDescriptor(name).getType().getSize();
+                size = type.getSize();
                 break;
             }
             case boldIntToken: {
@@ -574,16 +574,16 @@ public class Compiler extends Common{
 
         nextExpected(openParenToken);
         
-        int arity = 0;
+        int index = 0;
 
         if (scanner.getToken() != closeParenToken) {
-            nextParameterDeclaration(arity);
-            ++arity;
+            nextParameterDeclaration(index);
+            ++index;
 
             while(scanner.getToken() == commaToken){
                 scanner.nextToken();
-                nextParameterDeclaration(arity);
-                ++arity;
+                nextParameterDeclaration(index);
+                ++index;
             }
         }
 
@@ -603,11 +603,11 @@ public class Compiler extends Common{
         
         if(scanner.getToken() != boldBeginToken){
             
-            local += nextLocalDeclaration(40 + local + arity * Type.addressSize * -1);
+            local += nextLocalDeclaration(local + arity * Type.addressSize * -1);
 
             while(scanner.getToken() == semicolonToken){
                 scanner.nextToken();
-                local += nextLocalDeclaration(40 + local + arity * Type.addressSize * -1);
+                local += nextLocalDeclaration(local + arity * Type.addressSize * -1);
             }
         }
 
