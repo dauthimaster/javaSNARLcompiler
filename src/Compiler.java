@@ -935,7 +935,7 @@ public class Compiler extends Common{
                             throw new SnarlCompilerException(name + " is not a procedure.");
                         }
                         nextArguments((ProcedureType) type);
-                        registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue(), register); //TODO get register
+                        registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue(), register);
                         break;
                     }
                     case openBracketToken: {
@@ -945,7 +945,7 @@ public class Compiler extends Common{
                         scanner.nextToken();
                         typeCheck(nextExpression(), intType);
                         nextExpected(closeBracketToken);
-                        registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase(), register);  //TODO get register
+                        registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase(), register);
                         break;
                     }
                     default: {
@@ -1023,24 +1023,11 @@ public class Compiler extends Common{
         if(params != null){
             throw new SnarlCompilerException("Expected " + proc.getArity() + " arguments.");
         }
-        
-       /* if(arity != proc.getArity()){
-            throw new SnarlCompilerException("Expected " + proc.getArity() + " arguments.");
-        }*/
 
         nextExpected(closeParenToken);
 
         exit("arguments");
     }
-         /*
-    protected ProcedureType.Parameter advanceToNextParameter(Descriptor descriptor, ProcedureType.Parameter parameters){
-        if(parameters == null){
-            throw new SnarlCompilerException("Too many args"); //TODO: clean this up
-        } else if(!descriptor.getType().isSubtype(parameters.getType())){
-            throw new SnarlCompilerException("Arg has unexpected type");
-        }
-        return parameters.getNext();
-    }      */
 
     //NextExpected(int token). Checks to see if the current token is the token passed, if not throws an exception.
 
