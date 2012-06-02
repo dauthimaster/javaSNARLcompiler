@@ -60,7 +60,7 @@ public class Allocator {
     
     public Register request(){
         if(registers == null){
-            throw new SnarlCompilerException("Too many variables declared.");
+            throw new SnarlCompilerException("Out of memory.");
         }
         
         Register register = registers;
