@@ -242,8 +242,16 @@ public class Compiler extends Common{
         assembler = new Assembler("out.asm");
         global = new Global(assembler);
         opToString = new String[maxToken];
+        opToString[lessToken] = "slt";
+        opToString[lessEqualToken] = "sle";
+        opToString[lessGreaterToken] = "sne";
+        opToString[equalToken] = "seq";
+        opToString[greaterToken] = "sgt";
+        opToString[greaterEqualToken] = "sge";
         opToString[plusToken] = "add";
         opToString[dashToken] = "sub";
+        opToString[starToken] = "mul";
+        opToString[slashToken] = "div";
     }
     
     //Constructor. Returns a new Compiler positioned at the first unignored token using the specified output filename.
@@ -827,20 +835,30 @@ public class Compiler extends Common{
     protected RegisterDescriptor nextConjunction(){
         enter("conjunction");
 
-        RegisterDescriptor left = nextComparison();
+        RegisterDescriptor first = nextComparison();
 
         if (scanner.getToken() == boldAndToken) {
-            typeCheck(left, intType);
+            Label label = new Label("and");
+            
+            typeCheck(first, intType);
+            Allocator.Register register = first.getRegister();
+            
+            assembler.emit("sne", register, register, allocator.zero);
             while (scanner.getToken() == boldAndToken){
                 scanner.nextToken();
-                RegisterDescriptor right = nextComparison();
-                typeCheck(right, intType);
+                
+                RegisterDescriptor rest = nextComparison();
+                typeCheck(rest, intType);
+
+                assembler.emit("beq", register, allocator.zero, label);
+                assembler.emit("sne", register, rest.getRegister(), allocator.zero);
+                allocator.release(rest.getRegister());
             }
         }
 
         exit("conjunction");
         
-        return left;
+        return first;
     }
 
     //NextComparison. Parses the next comparison.
@@ -848,13 +866,21 @@ public class Compiler extends Common{
     protected RegisterDescriptor nextComparison(){
         enter("comparison");
 
-        RegisterDescriptor left = nextSum();
+        RegisterDescriptor first = nextSum();
 
         if(isInSet(scanner.getToken(), comparisonOperators)){
-            typeCheck(left, intType);
+            typeCheck(first, intType);
+            
+            int operator = scanner.getToken();
+            Allocator.Register register = first.getRegister();
+            
             scanner.nextToken();
-            RegisterDescriptor right = nextSum();
-            typeCheck(right, intType);
+            RegisterDescriptor rest = nextSum();
+            typeCheck(rest, intType);
+            
+            assembler.emit(opToString[operator], register, register, rest.getRegister());
+            
+            allocator.release(rest.getRegister());
         }
 
         if(isInSet(scanner.getToken(), comparisonOperators)){
@@ -863,7 +889,7 @@ public class Compiler extends Common{
         
         exit("comparison");
         
-        return left;
+        return first;
     }
 
     //NextSum. Parses the next sum.
@@ -902,11 +928,16 @@ public class Compiler extends Common{
 
         if (isInSet(scanner.getToken(), productOperators)) {
             typeCheck(first, intType);
+            Allocator.Register register = first.getRegister();
             while(isInSet(scanner.getToken(),productOperators)){
                 int operator = scanner.getToken();
                 scanner.nextToken();
                 RegisterDescriptor rest = nextTerm();
                 typeCheck(rest, intType);
+                
+                assembler.emit(opToString[operator], register, register, rest.getRegister());
+                
+                allocator.release(rest.getRegister());
             }
         }
 
@@ -939,19 +970,31 @@ public class Compiler extends Common{
             case dashToken: {
                 scanner.nextToken();
                 if(scanner.getToken() == intConstantToken){
-                    //generate code for a negative int constant
+                    Allocator.Register register = allocator.request();
+                    assembler.emit("li", register, -(scanner.getInt()));
+                    descriptor = new RegisterDescriptor(intType, register);
                     scanner.nextToken();
                 } else {
-                    //generate code for a negative term
+                    descriptor = nextTerm();
+                    typeCheck(descriptor, intType);
+                    
+                    assembler.emit("sub", descriptor.getRegister(), allocator.zero, descriptor.getRegister());
+                    
+                    scanner.nextToken();
                 }
                 break;
             }
             case boldNotToken: {
-                //etc
+                descriptor = nextTerm();
+                typeCheck(descriptor, intType);
+                
+                assembler.emit("seq", descriptor.getRegister(), allocator.zero, descriptor.getRegister());
+                
+                scanner.nextToken();
                 break;
             }
             default: {
-                //etc
+                descriptor = nextUnit();
                 break;
             }
         }
@@ -972,13 +1015,16 @@ public class Compiler extends Common{
                 NameDescriptor descriptor = table.getDescriptor(name);
                 Type type = descriptor.getType();
                 scanner.nextToken();
-                Allocator.Register register = null;
                 switch(scanner.getToken()){
                     case openParenToken: {
                         if(!(type instanceof ProcedureType)){
                             throw new SnarlCompilerException(name + " is not a procedure.");
                         }
                         nextArguments((ProcedureType) type);
+                        assembler.emit("jal", ((GlobalProcedureDescriptor) descriptor).getLabel());
+                        Allocator.Register register = allocator.request();
+                        assembler.emit("move", register, allocator.v0);
+                        
                         registerDescriptor = new RegisterDescriptor(((ProcedureType) type).getValue(), register);
                         break;
                     }
@@ -987,13 +1033,23 @@ public class Compiler extends Common{
                             throw new SnarlCompilerException(name + " is not an array.");
                         }
                         scanner.nextToken();
-                        typeCheck(nextExpression(), intType);
+                        RegisterDescriptor index = nextExpression();
+                        typeCheck(index, intType);
                         nextExpected(closeBracketToken);
+                        
+                        Allocator.Register register = descriptor.rvalue();
+                        assembler.emit("sll", index.getRegister(), index.getRegister(), 2);
+                        assembler.emit("add", register, register, index.getRegister());
+                        allocator.release(index.getRegister());
+                        assembler.emit("lw", register, 0, register);
+                        
                         registerDescriptor = new RegisterDescriptor(((ArrayType) type).getBase(), register);
                         break;
                     }
                     default: {
+                        Allocator.Register register = descriptor.rvalue();
                         registerDescriptor = new RegisterDescriptor(table.getDescriptor(name).getType(), register);
+                        scanner.nextToken();
                         break;
                     }
                 }
@@ -1043,24 +1099,30 @@ public class Compiler extends Common{
         
         nextExpected(openParenToken);
         ProcedureType.Parameter params = proc.getParameters();
-        //int arity = 0;
 
         if(scanner.getToken() != closeParenToken){
             if(params == null){
                 throw new SnarlCompilerException("Procedure has too many arguments");
             }
-            typeCheck(nextExpression(), params.getType());
+            RegisterDescriptor descriptor = nextExpression();
+            typeCheck(descriptor, params.getType());
+            assembler.emit("sw", descriptor.getRegister(), 0, allocator.sp);
+            allocator.release(descriptor.getRegister());
+            assembler.emit("addi", allocator.sp, allocator.sp, -4);
+            
             params = params.getNext();
-            //arity++;
-
             while(scanner.getToken() == commaToken){
                 scanner.nextToken();
                 if(params == null){
                     throw new SnarlCompilerException("Procedure has too many arguments");
                 }
-                typeCheck(nextExpression(), params.getType());
+                descriptor = nextExpression();
+                typeCheck(descriptor, params.getType());
+                assembler.emit("sw", descriptor.getRegister(), 0, allocator.sp);
+                allocator.release(descriptor.getRegister());
+                assembler.emit("addi", allocator.sp, allocator.sp, -4);
+                
                 params = params.getNext();
-                //arity++;
             }
         }
         
