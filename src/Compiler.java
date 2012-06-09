@@ -951,19 +951,6 @@ public class Compiler extends Common{
     protected RegisterDescriptor nextTerm(){
         enter("term");
 
-        /*Boolean operator = false;
-        
-        while(isInSet(scanner.getToken(),termOperators)){
-            scanner.nextToken();
-            operator = true;
-        }
-
-        RegisterDescriptor descriptor = nextUnit();
-
-        if(operator){
-            typeCheck(descriptor, intType);
-        }*/
-
         RegisterDescriptor descriptor;
         
         switch (scanner.getToken()){
