@@ -139,9 +139,7 @@ public class Compiler extends Common{
         {
             Allocator.Register register = allocator.request();
             assembler.emit("la", register, label);
-            if(type == intType){
-                assembler.emit("lw", register, 0, register);
-            }
+            assembler.emit("lw", register, 0, register);
             return register;
         }
 
@@ -463,14 +461,14 @@ public class Compiler extends Common{
                 scanner.nextToken();
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalVariableDescriptor(intType, -1 * index * Type.wordSize));
+                table.setDescriptor(name, new LocalVariableDescriptor(intType, -index * Type.wordSize));
                 break;
             }
             case boldStringToken: {
                 scanner.nextToken();
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalVariableDescriptor(stringType, -1 * index * Type.wordSize));
+                table.setDescriptor(name, new LocalVariableDescriptor(stringType, -index * Type.wordSize));
                 break;
             }
             case openBracketToken: {
@@ -481,7 +479,7 @@ public class Compiler extends Common{
                 nextExpected(boldIntToken);
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalArrayDescriptor(type, -1 * index * Type.wordSize));
+                table.setDescriptor(name, new LocalVariableDescriptor(type, -index * Type.wordSize));  //TODO ask Moen
                 break;
             }
             default: {
@@ -618,11 +616,11 @@ public class Compiler extends Common{
         
         if(scanner.getToken() != boldBeginToken){
             
-            local += nextLocalDeclaration(local + arity * Type.addressSize * -1);
+            local += nextLocalDeclaration(-local + arity * Type.addressSize);
 
             while(scanner.getToken() == semicolonToken){
                 scanner.nextToken();
-                local += nextLocalDeclaration(local + arity * Type.addressSize * -1);
+                local += nextLocalDeclaration(-local + arity * Type.addressSize);
             }
         }
 
@@ -701,7 +699,7 @@ public class Compiler extends Common{
                 break;
             }
             case colonEqualToken: {                                                
-                if(!(type == intType || type == stringType)){
+                if(!(type.isSubtype(intType) || type.isSubtype(stringType))){
                     throw new SnarlCompilerException(name + " must of type int or type string.");
                 }
                 scanner.nextToken();
@@ -787,12 +785,25 @@ public class Compiler extends Common{
     
     protected void nextWhileStatement(){
         enter("while statement");
-        
+
         nextExpected(boldWhileToken);
-        typeCheck(nextExpression(), intType);
+        
+        Label start = new Label("start");
+        Label end = new Label("end");
+        assembler.emit(start);
+        
+        RegisterDescriptor descriptor = nextExpression();
+        
+        typeCheck(descriptor, intType);
+        
+        assembler.emit("beq", descriptor.getRegister(), allocator.zero, end);
+        allocator.release(descriptor.getRegister());
         
         nextExpected(boldDoToken);
         nextStatement();
+        
+        assembler.emit("j", start);
+        assembler.emit(end);
         
         exit("while statement");
     }
