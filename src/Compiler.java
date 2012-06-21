@@ -781,28 +781,9 @@ public class Compiler extends Common{
     
     protected void nextIfStatement(){
         enter("if statement");
-        
-//        nextExpected(boldIfToken);
-//        RegisterDescriptor descriptor = nextExpression();
-//        typeCheck(descriptor, intType);
-//        Label exitLabel = new Label("endif");
-//        assembler.emit("beq", descriptor.getRegister(), allocator.zero, exitLabel);
-//        allocator.release(descriptor.getRegister());
-//        
-//        nextExpected(boldThenToken);
-//        nextStatement();
-//
-//        if(scanner.getToken() == boldElseToken){
-//            Label elseLabel = new Label("else");
-//            assembler.emit("j", elseLabel);
-//            scanner.nextToken();
-//            nextStatement();
-//            assembler.emit(elseLabel);
-//        }
-//
-//        assembler.emit(exitLabel);
 
         Label exitLabel = new Label("endif");
+
         while(scanner.getToken() == boldIfToken){
             scanner.nextToken();
             RegisterDescriptor descriptor = nextExpression();
