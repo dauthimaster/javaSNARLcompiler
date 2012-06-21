@@ -2,7 +2,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 /*
-SNARL/Compiler
+SNARL/Compiler Compiles Snarl code into MIPS assembly.
 
 James Current
 1/30/12
@@ -27,14 +27,14 @@ public class Compiler extends Common{
             boldIntToken,
             boldStringToken,
             openBracketToken);
-    protected SymbolTable table;
-    protected BasicType intType;
-    protected BasicType stringType;
-    protected Type procValType;
-    protected Allocator allocator;
-    protected Assembler assembler;
-    protected Global global;
-    protected String opToString[];
+    protected SymbolTable table;                    //Used to store names with descriptors
+    protected BasicType intType;                    //Basic Int Type
+    protected BasicType stringType;                 //Basic String Type
+    protected Type procValType;                     //Type of the current procedure's return value
+    protected Allocator allocator;                  //Used to allocate registers
+    protected Assembler assembler;                  //Used to write assembly code to output file
+    protected Global global;                        //Used to handle global variables
+    protected String opToString[];                  //Used to turn a token into a mips operation
 
     //  GLOBAL ARRAY DESCRIPTOR. Describe a global array.
 
