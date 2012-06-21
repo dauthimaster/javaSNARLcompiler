@@ -50,18 +50,18 @@ public class Global {
     
     public void emit(){
         assembler.emit(".data");
+        for(int i = 0; i < sizes.size(); i++){
+            int size = sizes.get(i);
+            Label label = labels.get(i);
+
+            assembler.emit(label, ".space " + size);
+        }
+
         for(Enumeration<String> strings = stringTable.keys(); strings.hasMoreElements();){
             String string = strings.nextElement();
             Label label = stringTable.get(string);
             
             assembler.emit(label, ".asciiz \"" + string + "\"");
-        }
-
-        for(int i = 0; i < sizes.size(); i++){
-            int size = sizes.get(i);
-            Label label = labels.get(i);
-            
-            assembler.emit(label, ".space " + size);
         }
     }
 }

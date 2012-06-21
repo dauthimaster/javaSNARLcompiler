@@ -23,9 +23,6 @@ public class Compiler extends Common{
     protected long productOperators = makeSet(      //Set of product operators
             starToken,
             slashToken);
-    protected long termOperators = makeSet(         //Set of term operators
-            dashToken,
-            boldNotToken);
     protected long declarationTokens = makeSet(     //Set of tokens that can start a declaration
             boldIntToken,
             boldStringToken,
@@ -353,7 +350,12 @@ public class Compiler extends Common{
     
     protected void passTwo(){
         enter("pass two");
+        assembler.emit(".text");
+        assembler.emit(".globl main");
+        assembler.emit("j main");
         nextProgram();
+        global.emit();
+        assembler.close();
         exit("pass two");
     }
 
@@ -479,7 +481,7 @@ public class Compiler extends Common{
                 nextExpected(boldIntToken);
                 String name = scanner.getString();
                 nextExpected(nameToken);
-                table.setDescriptor(name, new LocalVariableDescriptor(type, -index * Type.wordSize));  //TODO ask Moen
+                table.setDescriptor(name, new LocalVariableDescriptor(type, -index * Type.wordSize));
                 break;
             }
             default: {
@@ -548,6 +550,9 @@ public class Compiler extends Common{
         nextExpected(boldProcToken);
         
         String name = scanner.getString();
+        if(name.equals("main")){
+            assembler.emit("main:");
+        }
         
         nextExpected(nameToken);
 
@@ -574,7 +579,12 @@ public class Compiler extends Common{
         GlobalProcedureDescriptor descriptor = (GlobalProcedureDescriptor) table.getDescriptor(name);
 
         nextBody(descriptor);
-        
+
+        if (name.equals("main")) {
+            assembler.emit("li", allocator.v0, 10);
+            assembler.emit("syscall");
+        }
+
         table.pop();
 
         exit("procedure");
@@ -616,11 +626,11 @@ public class Compiler extends Common{
         
         if(scanner.getToken() != boldBeginToken){
             
-            local += nextLocalDeclaration(-local + arity * Type.addressSize);
+            local += nextLocalDeclaration(-(local + arity * Type.addressSize));
 
             while(scanner.getToken() == semicolonToken){
                 scanner.nextToken();
-                local += nextLocalDeclaration(-local + arity * Type.addressSize);
+                local += nextLocalDeclaration(-(local + arity * Type.addressSize));
             }
         }
 
@@ -642,6 +652,8 @@ public class Compiler extends Common{
             assembler.emit("lw $s" + i + ", " + offset + "($sp)");
         }
         assembler.emit("addi", allocator.sp, allocator.sp, (40 + local + 4 * arity));
+        
+        assembler.emit("jr", allocator.ra);
 
         exit("body");
     }
@@ -676,15 +688,13 @@ public class Compiler extends Common{
         enter("assignment or call statement");
         
         String name = scanner.getString();
-        Type type = table.getDescriptor(name).getType();
+        NameDescriptor descriptor = table.getDescriptor(name);
+        Type type = descriptor.getType();
         nextExpected(nameToken);
         
         switch(scanner.getToken()){
             case openParenToken: {
-                if(!(type instanceof ProcedureType)){
-                    throw new SnarlCompilerException(name + " is not a procedure.");
-                }
-                nextArguments((ProcedureType) type);
+                nextCall(descriptor, name);
                 break;
             }
             case openBracketToken: {
@@ -692,10 +702,21 @@ public class Compiler extends Common{
                     throw new SnarlCompilerException(name + " is not an array.");
                 }
                 scanner.nextToken();
-                typeCheck(nextExpression(), intType);
+                Allocator.Register register1 = descriptor.rvalue();
+                RegisterDescriptor registerDescriptor1 = nextExpression();
+                typeCheck(registerDescriptor1, intType);
+                Allocator.Register register2 = registerDescriptor1.getRegister();
                 nextExpected(closeBracketToken);
                 nextExpected(colonEqualToken);
-                typeCheck(nextExpression(), intType);
+                RegisterDescriptor registerDescriptor2 = nextExpression();
+                typeCheck(registerDescriptor2, intType);
+                Allocator.Register register3 = registerDescriptor2.getRegister();
+                assembler.emit("sll", register2, register2, 2);
+                assembler.emit("add", register1, register1, register2);
+                allocator.release(register2);
+                assembler.emit("sw", register3, 0, register1);
+                allocator.release(register1);
+                allocator.release(register3);
                 break;
             }
             case colonEqualToken: {                                                
@@ -703,8 +724,12 @@ public class Compiler extends Common{
                     throw new SnarlCompilerException(name + " must of type int or type string.");
                 }
                 scanner.nextToken();
-                Descriptor descriptor = nextExpression();
-                typeCheck(descriptor, type);
+                Allocator.Register register = descriptor.lvalue();
+                RegisterDescriptor registerDescriptor = nextExpression();
+                typeCheck(registerDescriptor, type);
+                assembler.emit("sw", registerDescriptor.getRegister(), 0, register);
+                allocator.release(register);
+                allocator.release(registerDescriptor.getRegister());
                 break;
             }
             default: {
@@ -746,6 +771,7 @@ public class Compiler extends Common{
         enter("code statement");
         
         nextExpected(boldCodeToken);
+        assembler.emit(scanner.getString());
         nextExpected(stringConstantToken);
         
         exit("code statement");
@@ -756,18 +782,54 @@ public class Compiler extends Common{
     protected void nextIfStatement(){
         enter("if statement");
         
-        nextExpected(boldIfToken);
-        typeCheck(nextExpression(), intType);
-        
-        nextExpected(boldThenToken);
-        nextStatement();
-        
-        if(scanner.getToken() == boldElseToken){
+//        nextExpected(boldIfToken);
+//        RegisterDescriptor descriptor = nextExpression();
+//        typeCheck(descriptor, intType);
+//        Label exitLabel = new Label("endif");
+//        assembler.emit("beq", descriptor.getRegister(), allocator.zero, exitLabel);
+//        allocator.release(descriptor.getRegister());
+//        
+//        nextExpected(boldThenToken);
+//        nextStatement();
+//
+//        if(scanner.getToken() == boldElseToken){
+//            Label elseLabel = new Label("else");
+//            assembler.emit("j", elseLabel);
+//            scanner.nextToken();
+//            nextStatement();
+//            assembler.emit(elseLabel);
+//        }
+//
+//        assembler.emit(exitLabel);
+
+        Label exitLabel = new Label("endif");
+        while(scanner.getToken() == boldIfToken){
             scanner.nextToken();
+            RegisterDescriptor descriptor = nextExpression();
+            typeCheck(descriptor, intType);
+            Label elseLabel = new Label("else");
+            assembler.emit("beq", descriptor.getRegister(), allocator.zero, elseLabel);
+            allocator.release(descriptor.getRegister());
+
+            nextExpected(boldThenToken);
             nextStatement();
+            
+            assembler.emit("j", exitLabel);
+            assembler.emit(elseLabel);
+            
+            if(scanner.getToken() == boldElseToken){
+                scanner.nextToken();
+                if(scanner.getToken() != boldIfToken){
+                    nextStatement();
+                }
+            }
         }
         
+        assembler.emit(exitLabel);
+
         exit("if statement");
+        
+        
     }
 
     //NextValueStatement. Parses the next value statement.
@@ -776,7 +838,10 @@ public class Compiler extends Common{
         enter("value statement");
         
         nextExpected(boldValueToken);
-        typeCheck(nextExpression(), procValType);
+        RegisterDescriptor descriptor = nextExpression();
+        typeCheck(descriptor, procValType);
+        assembler.emit("move", allocator.v0, descriptor.getRegister());
+        allocator.release(descriptor.getRegister());
         
         exit("value statement");
     }
@@ -1015,11 +1080,7 @@ public class Compiler extends Common{
                 scanner.nextToken();
                 switch(scanner.getToken()){
                     case openParenToken: {
-                        if(!(type instanceof ProcedureType)){
-                            throw new SnarlCompilerException(name + " is not a procedure.");
-                        }
-                        nextArguments((ProcedureType) type);
-                        assembler.emit("jal", ((GlobalProcedureDescriptor) descriptor).getLabel());
+                        nextCall(descriptor, name);
                         Allocator.Register register = allocator.request();
                         assembler.emit("move", register, allocator.v0);
                         
@@ -1047,7 +1108,6 @@ public class Compiler extends Common{
                     default: {
                         Allocator.Register register = descriptor.rvalue();
                         registerDescriptor = new RegisterDescriptor(table.getDescriptor(name).getType(), register);
-                        scanner.nextToken();
                         break;
                     }
                 }
@@ -1088,6 +1148,16 @@ public class Compiler extends Common{
         exit("unit");
         
         return registerDescriptor;
+    }
+    
+    //nextCall. Parses a procedure call, but does not move $v0 into a different register.
+    
+    protected void nextCall(NameDescriptor descriptor, String name){
+        if(!(descriptor.getType() instanceof ProcedureType)){
+            throw new SnarlCompilerException(name + " is not a procedure.");
+        }
+        nextArguments((ProcedureType) descriptor.getType());
+        assembler.emit("jal", ((GlobalProcedureDescriptor) descriptor).getLabel());
     }
 
     //NextArguments. Parses the next arguments.
@@ -1167,7 +1237,7 @@ public class Compiler extends Common{
 
     public static void main(String[] args){
         String file = args[0];
-        Compiler compiler = null;
+        Compiler compiler;
         Source source = null;
         try {
             source = new Source(new FileReader(file));
