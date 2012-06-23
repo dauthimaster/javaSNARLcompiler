@@ -352,7 +352,9 @@ public class Compiler extends Common{
         enter("pass two");
         assembler.emit(".text");
         assembler.emit(".globl main");
-        assembler.emit("j main");
+        assembler.emit("jal main");
+        assembler.emit("li", allocator.v0, 10);
+        assembler.emit("syscall");
         nextProgram();
         global.emit();
         assembler.close();
@@ -579,11 +581,6 @@ public class Compiler extends Common{
         GlobalProcedureDescriptor descriptor = (GlobalProcedureDescriptor) table.getDescriptor(name);
 
         nextBody(descriptor);
-
-        if (name.equals("main")) {
-            assembler.emit("li", allocator.v0, 10);
-            assembler.emit("syscall");
-        }
 
         table.pop();
 
