@@ -868,11 +868,12 @@ public class Compiler extends Common{
 
             while (scanner.getToken() == boldOrToken){
                 scanner.nextToken();
-                
+
+                assembler.emit("bne", register, allocator.zero, label);
+
                 RegisterDescriptor rest = nextConjunction();
                 typeCheck(rest, intType);
 
-                assembler.emit("bne", register, allocator.zero, label);
                 assembler.emit("sne", register, rest.getRegister(), allocator.zero);
                 allocator.release(rest.getRegister());
             }
@@ -900,14 +901,16 @@ public class Compiler extends Common{
             assembler.emit("sne", register, register, allocator.zero);
             while (scanner.getToken() == boldAndToken){
                 scanner.nextToken();
-                
+
+                assembler.emit("beq", register, allocator.zero, label);
+
                 RegisterDescriptor rest = nextComparison();
                 typeCheck(rest, intType);
 
-                assembler.emit("beq", register, allocator.zero, label);
                 assembler.emit("sne", register, rest.getRegister(), allocator.zero);
                 allocator.release(rest.getRegister());
             }
+            assembler.emit(label);
         }
 
         exit("conjunction");
